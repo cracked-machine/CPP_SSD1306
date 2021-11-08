@@ -5,15 +5,10 @@
 
 #include <array>
 #include <variant>
+#include <fontdata.hpp>
 
 namespace ssd1306
 {
-
-using Font3x5_t = std::array<uint16_t, 475>;
-using Font5x7_t = std::array<uint16_t, 680>;
-using Font7x10_t = std::array<uint16_t, 950>;
-using Font11x18_t = std::array<uint16_t, 1710>;
-using Font16x26_t = std::array<uint16_t, 2470>;
 
 class Font
 {

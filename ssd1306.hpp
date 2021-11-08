@@ -14,13 +14,9 @@
 #include "main.h"
 #include "spi.h"
 
-//#define Display_MIRROR_VERT
-//#define Display_MIRROR_HORIZ
+
 namespace ssd1306
 {
-
-
-//#define SSD1306_USE_I2C
 
 enum class Colour: uint16_t
 {

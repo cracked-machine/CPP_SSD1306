@@ -1,5 +1,5 @@
 /*
- * Ssd1306.cpp
+ * Display.cpp
  *
  *  Created on: 7 Nov 2021
  *      Author: chris
@@ -9,23 +9,24 @@
 #include "ssd1306.hpp"
 #include <sstream>
 
+namespace ssd1306
+{
 
-
-Ssd1306::Ssd1306()
+Display::Display()
 {
 	// do nothing else
 }
 
 
-void Ssd1306::init(void)
+void Display::init(void)
 {
-	// Reset OLED
+	// Reset Display
 	reset();
 
     // Wait for the screen to boot
     HAL_Delay(100);
 
-    // Init OLED
+    // Init Display
     write_command(0xAE); //display off
 
     write_command(0x20); //Set Memory Addressing Mode
@@ -76,10 +77,10 @@ void Ssd1306::init(void)
 
     write_command(0x8D); //--set DC-DC enable
     write_command(0x14); //
-    write_command(0xAF); //--turn on SSD1306 panel
+    write_command(0xAF); //--turn on Display panel
 
     // Clear screen
-    fill(Ssd1306::Colour::Black);
+    fill(Colour::Black);
 
     // Flush buffer to screen
     update_screen();
@@ -92,15 +93,15 @@ void Ssd1306::init(void)
 }
 
 
-void Ssd1306::fill(Ssd1306::Colour color)
+void Display::fill(Colour color)
 {
     for(auto &pixel : buffer)
     {
-        pixel = (color == Ssd1306::Colour::Black) ? 0x00 : 0xFF;
+        pixel = (color == Colour::Black) ? 0x00 : 0xFF;
     }
 }
 
-void Ssd1306::update_screen(void)
+void Display::update_screen(void)
 {
     for(uint8_t i = 0; i < 8; i++)
     {
@@ -111,7 +112,7 @@ void Ssd1306::update_screen(void)
     }
 }
 
-void Ssd1306::draw_pixel(uint8_t x, uint8_t y, Ssd1306::Colour color)
+void Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
 {
     if(x >= width || y >= height) {
         // Don't write outside the buffer
@@ -119,14 +120,14 @@ void Ssd1306::draw_pixel(uint8_t x, uint8_t y, Ssd1306::Colour color)
     }
 
     // Draw in the right color
-    if(color == Ssd1306::Colour::White) {
+    if(color == Colour::White) {
         buffer[x + (y / 8) * width] |= 1 << (y % 8);
     } else {
         buffer[x + (y / 8) * width] &= ~(1 << (y % 8));
     }
 }
 
-char Ssd1306::write_char(char ch, Font font, Ssd1306::Colour color, int padding)
+char Display::write_char(char ch, Font font, Colour color, int padding)
 {
     // Check remaining space on current line
     if (width <= (current_x + font.width) ||
@@ -141,7 +142,7 @@ char Ssd1306::write_char(char ch, Font font, Ssd1306::Colour color, int padding)
     {
     	for(size_t n = 0; n < font.height; n++)
 		{
-			draw_pixel(current_x, (current_y + n), Ssd1306::Colour::Black);
+			draw_pixel(current_x, (current_y + n), Colour::Black);
 		}
     	current_x += 1;
     }
@@ -150,28 +151,28 @@ char Ssd1306::write_char(char ch, Font font, Ssd1306::Colour color, int padding)
     // Use the font to write
     uint32_t b;
     for(size_t i = 0; i < font.height; i++) {
-        b = font.getPixel( (ch - 32) * font.height + i );
+        b = font.getChar( (ch - 32) * font.height + i );
         for(size_t j = 0; j < font.width; j++) {
             if((b << j) & 0x8000)
             {
-            	if (color == (Ssd1306::Colour::White))
+            	if (color == (Colour::White))
             	{
-            		draw_pixel(current_x + j, (current_y + i), Ssd1306::Colour::White);
+            		draw_pixel(current_x + j, (current_y + i), Colour::White);
             	}
             	else
             	{
-            		draw_pixel(current_x + j, (current_y + i), Ssd1306::Colour::Black);
+            		draw_pixel(current_x + j, (current_y + i), Colour::Black);
             	}
             }
             else
             {
-            	if (color == (Ssd1306::Colour::White))
+            	if (color == (Colour::White))
             	{
-            		draw_pixel(current_x + j, (current_y + i), Ssd1306::Colour::Black);
+            		draw_pixel(current_x + j, (current_y + i), Colour::Black);
             	}
             	else
             	{
-            		draw_pixel(current_x + j, (current_y + i), Ssd1306::Colour::White);
+            		draw_pixel(current_x + j, (current_y + i), Colour::White);
             	}
 
             }
@@ -188,7 +189,7 @@ char Ssd1306::write_char(char ch, Font font, Ssd1306::Colour color, int padding)
     return ch;
 }
 
-char Ssd1306::write_string(std::stringstream &ss, Font font, Ssd1306::Colour color, int padding)
+char Display::write_string(std::stringstream &ss, Font font, Colour color, int padding)
 {
     // Write until null-byte
 	char ch;
@@ -205,7 +206,7 @@ char Ssd1306::write_string(std::stringstream &ss, Font font, Ssd1306::Colour col
     return ch;
 }
 
-void Ssd1306::set_cursor(uint8_t x, uint8_t y)
+void Display::set_cursor(uint8_t x, uint8_t y)
 {
     current_x = x;
     current_y = y;
@@ -213,30 +214,32 @@ void Ssd1306::set_cursor(uint8_t x, uint8_t y)
 
 
 // Low-level procedures
-void Ssd1306::reset(void)
+void Display::reset(void)
 {
 	// CS = High (not selected)
-	//HAL_GPIO_WritePin(SSD1306_CS_Port, SSD1306_CS_Pin, GPIO_PIN_SET);
+	//HAL_GPIO_WritePin(Display_CS_Port, Display_CS_Pin, GPIO_PIN_SET);
 
-	// Reset the OLED
+	// Reset the Display
 	HAL_GPIO_WritePin(reset_port, reset_pin, GPIO_PIN_RESET);
 	HAL_Delay(10);
 	HAL_GPIO_WritePin(reset_port, reset_pin, GPIO_PIN_SET);
 	HAL_Delay(10);
 }
 
-void Ssd1306::write_command(uint8_t byte)
+void Display::write_command(uint8_t byte)
 {
-    //HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select OLED
-    HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_RESET); // command
-    HAL_SPI_Transmit(&spi_port, (uint8_t *) &byte, 1, HAL_MAX_DELAY);
-    //HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select OLED
+	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select Display
+	HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_RESET); // command
+	HAL_SPI_Transmit(&spi_port, (uint8_t *) &byte, 1, HAL_MAX_DELAY);
+	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select Display
 }
 
-void Ssd1306::write_data(uint8_t* buffer, size_t buff_size)
+void Display::write_data(uint8_t* buffer, size_t buff_size)
 {
-    //HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select OLED
-    HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_SET); // data
-    HAL_SPI_Transmit(&spi_port, buffer, buff_size, HAL_MAX_DELAY);
-    //HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select OLED
+	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select Display
+	HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_SET); // data
+	HAL_SPI_Transmit(&spi_port, buffer, buff_size, HAL_MAX_DELAY);
+	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select Display
 }
+
+} // namespace ssd1306

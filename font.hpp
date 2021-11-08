@@ -1,12 +1,13 @@
 #include <stdint.h>
 
-#ifndef __FONTDEF_HPP__
-#define __FONTDEF_HPP__
+#ifndef __FONT_HPP__
+#define __FONT_HPP__
 
 #include <array>
 #include <variant>
 
-
+namespace ssd1306
+{
 
 using Font3x5_t = std::array<uint16_t, 475>;
 using Font5x7_t = std::array<uint16_t, 680>;
@@ -30,12 +31,12 @@ public:
 	std::variant<Font3x5_t, Font5x7_t, Font7x10_t, Font11x18_t, Font16x26_t> _data;
 
 	// return value of data at idx
-	uint16_t getPixel(size_t idx);
+	uint16_t getChar(size_t idx);
 
 };
 
 
 
+} // namespace ssd1306
 
-
-#endif // __FONTDEF_HPP__
+#endif // __FONT_HPP__

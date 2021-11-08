@@ -1,22 +1,9 @@
-#include "../CPP_SSD1306/fontdef.hpp"
-
+#include <font.hpp>
 #include <array>
 #include <cstddef>
 
-/*
-Example
-5x7 - #
-
--	-	-	-	-	0x0000
--	x	-	x	-	0x5000
-x	x	x	x	x	0xFFFF
--	x	-	x	-	0x5000
-x	x	x	x	x	0xFFFF
--	x	-	x	-	0x5000
--	-	-	-	-	0x0000
-
-*/
-
+namespace ssd1306
+{
 
 void Font::init(std::variant<Font3x5_t, Font5x7_t, Font7x10_t, Font11x18_t, Font16x26_t> data)
 {
@@ -52,7 +39,7 @@ void Font::init(std::variant<Font3x5_t, Font5x7_t, Font7x10_t, Font11x18_t, Font
 	}
 }
 
-uint16_t Font::getPixel(size_t idx)
+uint16_t Font::getChar(size_t idx)
 {
 
 	if (const auto& data = std::get_if<Font3x5_t>(&_data))
@@ -81,3 +68,4 @@ uint16_t Font::getPixel(size_t idx)
 	return 0;
 }
 
+} //namespace ssd1306

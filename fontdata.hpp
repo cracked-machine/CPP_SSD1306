@@ -5,16 +5,15 @@
  *      Author: chris
  */
 
-#ifndef __FONTDATA_HPP_
-#define __FONTDATA_HPP_
+#ifndef __FONTDATA_HPP__
+#define __FONTDATA_HPP__
 
-#include "../CPP_SSD1306/fontdef.hpp"
+#include <font.hpp>
 
-namespace Fonts {
+namespace ssd1306
+{
 
 
-
-// TOP							BOTTOM
 
 // Note this font size does NOT support lowercase!
 Font3x5_t Font3x5 {
@@ -509,6 +508,6 @@ Font16x26_t Font16x26 {
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x3F07,0x7FC7,0x73E7,0xF1FF,0xF07E,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000, // Ascii = [~]
 };
 
-}
+} //namespace ssd1306
 
 #endif /* FONTDATA_HPP_ */

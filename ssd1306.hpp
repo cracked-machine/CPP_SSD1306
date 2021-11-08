@@ -1,41 +1,47 @@
 /*
- * Ssd1306.hpp
+ * Display.hpp
  *
  *  Created on: 7 Nov 2021
  *      Author: chris
  */
 
-#ifndef SSD1306_HPP_
-#define SSD1306_HPP_
+#ifndef Display_HPP_
+#define Display_HPP_
 
+#include <font.hpp>
 #include "stm32g0xx.h"
 #include "main.h"
 #include "spi.h"
-#include "../CPP_SSD1306/fontdef.hpp"
 
-//#define SSD1306_MIRROR_VERT
-//#define SSD1306_MIRROR_HORIZ
+//#define Display_MIRROR_VERT
+//#define Display_MIRROR_HORIZ
+namespace ssd1306
+{
 
-class Ssd1306
+
+//#define SSD1306_USE_I2C
+
+enum class Colour: uint16_t
+{
+    Black = 0x00, // Black colour, no pixel
+    White = 0x01  // Pixel is set. Color depends on Display
+};
+
+
+class Display
 {
 public:
-	Ssd1306();
+	Display();
 
-	virtual ~Ssd1306() = default;
-
-	enum class Colour: uint16_t
-	{
-	    Black = 0x00, // Black color, no pixel
-	    White = 0x01  // Pixel is set. Color depends on OLED
-	};
+	virtual ~Display() = default;
 
 	// Procedure definitions
 	void init(void);
-	void fill(Ssd1306::Colour color);
+	void fill(Colour colour);
 	void update_screen(void);
-	void draw_pixel(uint8_t x, uint8_t y, Ssd1306::Colour color);
-	char write_char(char ch, Font font, Ssd1306::Colour color, int padding);
-	char write_string(std::stringstream &ss, Font font, Ssd1306::Colour color, int padding);
+	void draw_pixel(uint8_t x, uint8_t y, Colour colour);
+	char write_char(char ch, Font font, Colour colour, int padding);
+	char write_string(std::stringstream &ss, Font font, Colour colour, int padding);
 	void set_cursor(uint8_t x, uint8_t y);
 
 
@@ -52,7 +58,7 @@ private:
     uint8_t inverted {0};
     uint8_t initialized {0};
 
-    // OLED dimensions
+    // Display dimensions
     static constexpr uint16_t width {128};
     static constexpr uint16_t height {64};
     std::array<uint8_t, (width*height)/8> buffer;
@@ -68,5 +74,6 @@ private:
 
 };
 
+} // namespace ssd1306
 
-#endif /* SSD1306_HPP_ */
+#endif /* Display_HPP_ */

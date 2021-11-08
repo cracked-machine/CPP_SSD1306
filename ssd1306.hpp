@@ -9,6 +9,7 @@
 #define Display_HPP_
 
 #include <font.hpp>
+
 #include "stm32g0xx.h"
 #include "main.h"
 #include "spi.h"

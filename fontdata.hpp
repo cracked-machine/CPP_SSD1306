@@ -13,7 +13,7 @@
 namespace ssd1306
 {
 
-
+// TOP							BOTTOM
 
 // Note this font size does NOT support lowercase!
 Font3x5_t Font3x5 {

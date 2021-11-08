@@ -35,8 +35,6 @@ public:
 
 };
 
-
-
 } // namespace ssd1306
 
 #endif // __FONT_HPP__

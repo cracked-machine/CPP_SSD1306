@@ -10,25 +10,27 @@ Very basic test: flashing text!
 #endif
 
 #include "ssd1306.hpp"
+#include <sstream>
 
   void test()
   {
-    Font xl_font;
-    xl_font.init(Fonts::Font16x26);
+    ssd1306::FontData fd;
+    ssd1306::Font xl_font;
+    xl_font.init(fd.Font16x26);
 
-    Ssd1306 oled;
+    ssd1306::Display oled;
     oled.init();
 
     while(true)
     {
-      oled.fill(Ssd1306::Colour::Black);
+      oled.fill(ssd1306::Colour::Black);
       oled.set_cursor(2, 0);
       std::stringstream text("TEST");
-      oled.write_string(text, xl_font, Ssd1306::Colour::White, 0);
+      oled.write_string(text, xl_font, ssd1306::Colour::White, 0);
       oled.update_screen();
 
       HAL_Delay(1000);
-      oled.fill(Ssd1306::Colour::Black);
+      oled.fill(ssd1306::Colour::Black);
       oled.update_screen();
       HAL_Delay(1000);
     }

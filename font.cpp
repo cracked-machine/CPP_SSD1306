@@ -42,25 +42,25 @@ void Font::init(std::variant<Font3x5_t, Font5x7_t, Font7x10_t, Font11x18_t, Font
 uint16_t Font::getChar(size_t idx)
 {
 
-	if (const auto& data = std::get_if<Font3x5_t>(&_data))
+	if (const auto& font3x5_data = std::get_if<Font3x5_t>(&_data))
 	{
-		return data->at(idx);
+		return font3x5_data->at(idx);
 	}
-	else if (const auto& data = std::get_if<Font5x7_t>(&_data))
+	else if (const auto& font5x7_data = std::get_if<Font5x7_t>(&_data))
 	{
-		return data->at(idx);
+		return font5x7_data->at(idx);
 	}
-	else if (const auto& data = std::get_if<Font7x10_t>(&_data))
+	else if (const auto& font7x10_data = std::get_if<Font7x10_t>(&_data))
 	{
-		return data->at(idx);
+		return font7x10_data->at(idx);
 	}
-	else if (const auto& data = std::get_if<Font11x18_t>(&_data))
+	else if (const auto& font11x18_data = std::get_if<Font11x18_t>(&_data))
 	{
-		return data->at(idx);
+		return font11x18_data->at(idx);
 	}
-	else if (const auto& data = std::get_if<Font16x26_t>(&_data))
+	else if (const auto& font16x26_data = std::get_if<Font16x26_t>(&_data))
 	{
-		return data->at(idx);
+		return font16x26_data->at(idx);
 	}
 
 	// Default value in case of monostate.

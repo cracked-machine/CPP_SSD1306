@@ -226,19 +226,19 @@ void Display::reset(void)
 	HAL_Delay(10);
 }
 
-void Display::write_command(uint8_t byte)
+void Display::write_command(uint8_t cmd_byte)
 {
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select Display
 	HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_RESET); // command
-	HAL_SPI_Transmit(&spi_port, (uint8_t *) &byte, 1, HAL_MAX_DELAY);
+	HAL_SPI_Transmit(&spi_port, (uint8_t *) &cmd_byte, 1, HAL_MAX_DELAY);
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select Display
 }
 
-void Display::write_data(uint8_t* buffer, size_t buff_size)
+void Display::write_data(uint8_t* data_buffer, size_t data_buffer_size)
 {
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select Display
 	HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_SET); // data
-	HAL_SPI_Transmit(&spi_port, buffer, buff_size, HAL_MAX_DELAY);
+	HAL_SPI_Transmit(&spi_port, data_buffer, data_buffer_size, HAL_MAX_DELAY);
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select Display
 }
 

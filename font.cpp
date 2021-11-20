@@ -5,7 +5,7 @@
 namespace ssd1306
 {
 
-void Font::init(std::variant<Font3x5_t, Font5x7_t, Font7x10_t, Font11x18_t, Font16x26_t> data)
+void Font::set_font(std::variant<Font3x5_t, Font5x7_t, Font7x10_t, Font11x18_t, Font16x26_t> data)
 {
 	if (std::get_if<Font3x5_t>(&data))
 	{

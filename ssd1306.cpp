@@ -127,6 +127,18 @@ void Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
     }
 }
 
+char Display::write(std::stringstream &msg, Font &font, uint8_t x, uint8_t y, Colour bg, Colour fg, int padding, bool update)
+{
+    fill(bg);
+    set_cursor(x, y);
+    char res = write_string(msg, font, fg, padding);
+    if (update)
+    {
+        update_screen();
+    }
+    return res;
+}
+
 char Display::write_char(char ch, Font font, Colour color, int padding)
 {
     // Check remaining space on current line

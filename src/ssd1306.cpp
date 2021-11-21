@@ -242,7 +242,7 @@ void Display::reset(void)
 #endif
 }
 
-void Display::write_command(uint8_t cmd_byte)
+void Display::write_command(uint8_t cmd_byte __attribute__((unused)))
 {
 #ifdef USE_HAL_DRIVER
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select Display
@@ -250,11 +250,11 @@ void Display::write_command(uint8_t cmd_byte)
 	HAL_SPI_Transmit(&spi_port, (uint8_t *) &cmd_byte, 1, HAL_MAX_DELAY);
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select Display
 #else
-    std::cout << +cmd_byte << std::endl;
+ 
 #endif
 }
 
-void Display::write_data(uint8_t* data_buffer, size_t data_buffer_size)
+void Display::write_data(uint8_t* data_buffer __attribute__((unused)), size_t data_buffer_size __attribute__((unused)))
 {
 #ifdef USE_HAL_DRIVER
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select Display
@@ -262,8 +262,7 @@ void Display::write_data(uint8_t* data_buffer, size_t data_buffer_size)
 	HAL_SPI_Transmit(&spi_port, data_buffer, data_buffer_size, HAL_MAX_DELAY);
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select Display
 #else
-    for (size_t idx = 0; idx < data_buffer_size; idx++)
-        std::cout << +data_buffer[idx] << std::endl;
+
 #endif
 }
 

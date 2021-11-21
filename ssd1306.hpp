@@ -10,9 +10,11 @@
 
 #include <font.hpp>
 
-#include "stm32g0xx.h"
-#include "main.h"
-#include "spi.h"
+#ifdef USE_HAL_DRIVER
+	#include "stm32g0xx.h"
+	#include "main.h"
+	#include "spi.h"
+#endif
 
 
 namespace ssd1306
@@ -60,7 +62,7 @@ private:
     static constexpr uint16_t width {128};
     static constexpr uint16_t height {64};
     std::array<uint8_t, (width*height)/8> buffer;
-
+#ifdef USE_HAL_DRIVER
     // SPI configuration
 	SPI_HandleTypeDef spi_port {hspi1};
 	uint16_t cs_port {0};
@@ -69,6 +71,7 @@ private:
 	uint16_t dc_pin {SPI1_DC_Pin};
 	GPIO_TypeDef* reset_port {SPI1_RESET_GPIO_Port};
 	uint16_t reset_pin {SPI1_RESET_Pin};
+#endif
 
 };
 

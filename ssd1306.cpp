@@ -8,6 +8,7 @@
 
 #include "ssd1306.hpp"
 #include <sstream>
+#include <iostream>
 
 namespace ssd1306
 {
@@ -24,8 +25,9 @@ void Display::init(void)
 	reset();
 
     // Wait for the screen to boot
+#ifdef USE_HAL_DRIVER
     HAL_Delay(100);
-
+#endif
     // Init Display
     write_command(0xAE); //display off
 
@@ -232,26 +234,37 @@ void Display::reset(void)
 	//HAL_GPIO_WritePin(Display_CS_Port, Display_CS_Pin, GPIO_PIN_SET);
 
 	// Reset the Display
+#ifdef USE_HAL_DRIVER
 	HAL_GPIO_WritePin(reset_port, reset_pin, GPIO_PIN_RESET);
 	HAL_Delay(10);
 	HAL_GPIO_WritePin(reset_port, reset_pin, GPIO_PIN_SET);
 	HAL_Delay(10);
+#endif
 }
 
 void Display::write_command(uint8_t cmd_byte)
 {
+#ifdef USE_HAL_DRIVER
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select Display
 	HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_RESET); // command
 	HAL_SPI_Transmit(&spi_port, (uint8_t *) &cmd_byte, 1, HAL_MAX_DELAY);
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select Display
+#else
+    std::cout << +cmd_byte << std::endl;
+#endif
 }
 
 void Display::write_data(uint8_t* data_buffer, size_t data_buffer_size)
 {
+#ifdef USE_HAL_DRIVER
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select Display
 	HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_SET); // data
 	HAL_SPI_Transmit(&spi_port, data_buffer, data_buffer_size, HAL_MAX_DELAY);
 	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select Display
+#else
+    for (size_t idx = 0; idx < data_buffer_size; idx++)
+        std::cout << +data_buffer[idx] << std::endl;
+#endif
 }
 
 } // namespace ssd1306

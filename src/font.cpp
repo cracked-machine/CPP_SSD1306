@@ -5,38 +5,44 @@
 namespace ssd1306
 {
 
-void Font::set_font(std::variant<Font3x5_t, Font5x7_t, Font7x10_t, Font11x18_t, Font16x26_t> data)
+bool Font::set_font(std::variant<Font3x5_t, Font5x7_t, Font7x10_t, Font11x18_t, Font16x26_t> data)
 {
 	if (std::get_if<Font3x5_t>(&data))
 	{
 		width = 5;
 		height = 5;
 		_data = data;
+		return true;
 	}
 	else if (std::get_if<Font5x7_t>(&data))
 	{
 		width = 5;
 		height = 7;
 		_data = data;
+		return true;
 	}
 	else if (std::get_if<Font7x10_t>(&data))
 	{
 		width = 7;
 		height = 10;
 		_data = data;
+		return true;
 	}
 	else if (std::get_if<Font11x18_t>(&data))
 	{
 		width = 11;
 		height = 18;
 		_data = data;
+		return true;
 	}
 	else if (std::get_if<Font16x26_t>(&data))
 	{
 		width = 16;
 		height = 26;
 		_data = data;
+		return true;
 	}
+	return false;
 }
 
 uint16_t Font::getChar(size_t idx)

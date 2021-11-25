@@ -1,7 +1,7 @@
 
 
 
-#include "catch.hpp"
+#include <catch2/catch_all.hpp>
 #include <iostream>
 #include <ssd1306.hpp>
 #include <array>
@@ -9,7 +9,7 @@
 #include <variant>
 
 
-TEST_CASE("Test SSD1306 Driver", "[ssd1306]")
+TEST_CASE("Test SSD1306 Driver", "[cpp_ssd1306]")
 {
     
     ssd1306::FontData fd;

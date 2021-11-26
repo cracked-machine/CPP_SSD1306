@@ -27,7 +27,7 @@ public:
 	{
 	};
 
-	virtual uint16_t get_char(size_t idx);
+	virtual uint16_t get_char(size_t idx) = 0;
 	uint8_t width() { return m_width; }
 	uint8_t height() { return m_height; }
 	virtual size_t size();

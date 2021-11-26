@@ -147,11 +147,13 @@ char Display::write(std::stringstream &msg, Font &font, uint8_t x, uint8_t y, Co
 }
 
 
-char Display::write_char(char ch, Font font, Colour color, int padding)
+char Display::write_char(char ch, Font &font, Colour color, int padding)
 {
 
-#ifndef USE_HAL
+#ifndef USE_HAL_DRIVER
     std::cout << ch << std::endl;
+#else
+    SEGGER_RTT_printf(0, "%c ", ch);
 #endif
 
     // Check remaining space on current line
@@ -214,7 +216,7 @@ char Display::write_char(char ch, Font font, Colour color, int padding)
     return ch;
 }
 
-char Display::write_string(std::stringstream &ss, Font font, Colour color, int padding)
+char Display::write_string(std::stringstream &ss, Font &font, Colour color, int padding)
 {
     // Write until null-byte
 	char ch;

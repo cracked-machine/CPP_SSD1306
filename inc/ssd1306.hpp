@@ -44,8 +44,8 @@ public:
 	void fill(Colour colour);
 	void update_screen(void);
 	void draw_pixel(uint8_t x, uint8_t y, Colour colour);
-	char write_char(char ch, Font font, Colour colour, int padding);
-	char write_string(std::stringstream &ss, Font font, Colour colour, int padding);
+	char write_char(char ch, Font &font, Colour colour, int padding);
+	char write_string(std::stringstream &ss, Font &font, Colour colour, int padding);
 	char write(std::stringstream &msg, Font &font, uint8_t x, uint8_t y, Colour bg, Colour fg, int padding, bool update);
 	void set_cursor(uint8_t x, uint8_t y);
 

@@ -8,7 +8,12 @@
 #ifndef Display_HPP_
 #define Display_HPP_
 
-#include <font.hpp>
+
+#include <font3x5.hpp>
+#include <font5x7.hpp>
+#include <font7x10.hpp>
+#include <font11x16.hpp>
+#include <font16x26.hpp>
 
 #ifdef USE_HAL_DRIVER
 	#include "stm32g0xx.h"
@@ -43,8 +48,6 @@ public:
 	char write_string(std::stringstream &ss, Font font, Colour colour, int padding);
 	char write(std::stringstream &msg, Font &font, uint8_t x, uint8_t y, Colour bg, Colour fg, int padding, bool update);
 	void set_cursor(uint8_t x, uint8_t y);
-
-
 
 private:
 	// Low-level procedures

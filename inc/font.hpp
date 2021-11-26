@@ -1,32 +1,40 @@
-#include <stdint.h>
+
 
 #ifndef __FONT_HPP__
 #define __FONT_HPP__
 
+#include <stdint.h>
 #include <array>
-#include <variant>
-#include <fontdata.hpp>
+//#include <variant>
+//#include <fontdata.hpp>
+
+
 
 namespace ssd1306
 {
 
 class Font
 {
+
 public:
-	Font() = default;
 
-	virtual ~Font() = default;
 
-	bool set_font(std::variant<Font3x5_t, Font5x7_t, Font7x10_t, Font11x18_t, Font16x26_t> data);
+	Font(uint8_t width, uint8_t height) : m_width{width}, m_height{height} 
+	{
+	};
+	
+	virtual ~Font() 
+	{
+	};
 
-	uint8_t width{0};    /*!< Font width in pixels */
-	uint8_t height{0};   /*!< Font height in pixels */
+	virtual uint16_t get_char(size_t idx);
+	uint8_t width() { return m_width; }
+	uint8_t height() { return m_height; }
+	virtual size_t size();
+protected:
 
-	// the font character data
-	std::variant<Font3x5_t, Font5x7_t, Font7x10_t, Font11x18_t, Font16x26_t> _data;
-
-	// return value of data at idx
-	uint16_t getChar(size_t idx);
+	uint8_t m_width{0}; 
+	uint8_t m_height{0};  
 
 };
 

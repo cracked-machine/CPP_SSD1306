@@ -11,10 +11,18 @@ class Font11x16: public Font
 {
 
 public:
+
+    // @brief Construct a new Font 1 1x 1 6 object
+    // Passes font dimensions to base class
     Font11x16() : Font{11, 16}
     {}
 
+    // @brief Get the char object
+	// @param idx The position in the font data array to retrieve data
+	// @return uint16_t The halfword of data we retrieve
     uint16_t get_char(size_t idx) override { return data.at(idx); }
+
+
     size_t size() override { return data.size(); }
 
 private:

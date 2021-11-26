@@ -1,5 +1,4 @@
 target_sources(${BUILD_NAME} PRIVATE
-    src/font.cpp
     src/ssd1306.cpp
 )
 

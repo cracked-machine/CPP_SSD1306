@@ -7,13 +7,6 @@
 
 
 #include "ssd1306.hpp"
-#include <sstream>
-#include <iostream>
-
-
-#include <array>
-
-
 
 namespace ssd1306
 {
@@ -132,105 +125,6 @@ void Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
     } else {
         buffer[x + (y / 8) * width] &= ~(1 << (y % 8));
     }
-}
-
-char Display::write(std::stringstream &msg, Font &font, uint8_t x, uint8_t y, Colour bg, Colour fg, int padding, bool update)
-{
-    fill(bg);
-    set_cursor(x, y);
-    char res = write_string(msg, font, fg, padding);
-    if (update)
-    {
-        update_screen();
-    }
-    return res;
-}
-
-
-char Display::write_char(char ch, Font &font, Colour color, int padding)
-{
-
-#ifndef USE_HAL_DRIVER
-    std::cout << ch << std::endl;
-#else
-    SEGGER_RTT_printf(0, "%c ", ch);
-#endif
-
-    // Check remaining space on current line
-    if (width <= (current_x + font.width()) ||
-        width <= (current_y + font.height()))
-    {
-        // Not enough space on current line
-        return 0;
-    }
-
-    // add extra leading horizontal space
-    if (padding == 1)
-    {
-    	for(size_t n = 0; n < font.height(); n++)
-		{
-			draw_pixel(current_x, (current_y + n), Colour::Black);
-		}
-    	current_x += 1;
-    }
-
-
-    // Use the font to write
-    uint32_t b;
-    for(size_t i = 0; i < font.height(); i++) {
-        b = font.get_char( (ch - 32) * font.height() + i );
-        for(size_t j = 0; j < font.width(); j++) {
-            if((b << j) & 0x8000)
-            {
-            	if (color == (Colour::White))
-            	{
-            		draw_pixel(current_x + j, (current_y + i), Colour::White);
-            	}
-            	else
-            	{
-            		draw_pixel(current_x + j, (current_y + i), Colour::Black);
-            	}
-            }
-            else
-            {
-            	if (color == (Colour::White))
-            	{
-            		draw_pixel(current_x + j, (current_y + i), Colour::Black);
-            	}
-            	else
-            	{
-            		draw_pixel(current_x + j, (current_y + i), Colour::White);
-            	}
-
-            }
-        }
-    }
-
-    // The current space is now taken
-    current_x += font.width();
-    // add extra leading horizontal space
-    if (padding == 1)
-    	current_x += 1;
-
-    // Return written char for validation
-    return ch;
-}
-
-char Display::write_string(std::stringstream &ss, Font &font, Colour color, int padding)
-{
-    // Write until null-byte
-	char ch;
-    while (ss.get(ch))
-    {
-        if (write_char(ch, font, color, padding) != ch)
-        {
-            // Char could not be written
-            return ch;
-        }
-    }
-
-    // Everything ok
-    return ch;
 }
 
 void Display::set_cursor(uint8_t x, uint8_t y)

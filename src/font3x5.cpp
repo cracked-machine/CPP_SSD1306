@@ -1,34 +1,12 @@
-#ifndef __FONT3x5_HPP__
-#define __FONT3x5_HPP__
-
 #include <font.hpp>
 
 
 namespace ssd1306
 {
 
-// @brief 3x5 font object
-class Font3x5 : public Font
-{
-public:
-    // @brief Construct a new Font 3x 5 object
-    // Passes font dimensions to base class
-    Font3x5() : Font{5, 5}
-    {}
-
-    // @brief Get the char object
-    // Implementation of pure virtual function
-	// @param idx The position in the font data array to retrieve data
-	// @return uint16_t The halfword of data we retrieve
-    uint16_t get_char(size_t idx) override { return data.at(idx); }
-
-    // @brief get the font data array size
-    // @return size_t 
-    size_t size() override { return data.size(); }
-private:
-    
-    // @brief The font data array
-    std::array<uint16_t, 475> data {
+template<> uint8_t Font3x5::m_width{5};
+template<> uint8_t Font3x5::m_height{5};
+template<> std::array<uint16_t, 475> Font3x5::data {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // sp
     0x1000, 0x1000, 0x0000, 0x1000, 0x0000,  // !
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // "
@@ -124,10 +102,6 @@ private:
     0x0000, 0x0000, 0x0000, 0x0000, 0x7000,  // |
     0x0000, 0x0000, 0x0000, 0x0000, 0x7000,  // }
     0x0000, 0x0000, 0x0000, 0x0000, 0x7000,  // ~
-    };
-
 };
 
 }
-
-#endif // __FONT3x5_HPP__

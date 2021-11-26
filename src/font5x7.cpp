@@ -1,32 +1,12 @@
-#ifndef __FONT5x7_HPP__
-#define __FONT5x7_HPP__
-
 #include <font.hpp>
 
 
 namespace ssd1306
 {
 
-class Font5x7: public Font
-{
-
-public:
-
-    // @brief Construct a new Font 5x 7 object
-    // Passes font dimensions to base class
-    Font5x7() : Font{5, 7}
-    {}
-
-    // @brief Get the char object
-	// @param idx The position in the font data array to retrieve data
-	// @return uint16_t The halfword of data we retrieve
-    uint16_t get_char(size_t idx) override { return data.at(idx); }
-    size_t size() override { return data.size(); }
-
-private:
-
-
-    std::array<uint16_t, 680> data {
+template<> uint8_t Font5x7::m_width{5};
+template<> uint8_t Font5x7::m_height{7};
+template<> std::array<uint16_t, 680> Font5x7::data {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // sp
     0x1000, 0x1000, 0x0000, 0x1000, 0x0000,  // !
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // "
@@ -122,11 +102,7 @@ private:
     0x0000, 0x0000, 0x0000, 0x0000, 0x7000,  // |
     0x0000, 0x0000, 0x0000, 0x0000, 0x7000,  // }
     0x0000, 0x0000, 0x0000, 0x0000, 0x7000,  // ~
-    };
-
-
 };
 
-}   // namespace ssd1306
 
-#endif // __FONT3x5_HPP__
+}

@@ -8,12 +8,12 @@
 #ifndef Display_HPP_
 #define Display_HPP_
 
+#include <variant>
+#include <font.hpp>
+#include <sstream>
+#include <iostream>
+#include <array>
 
-#include <font3x5.hpp>
-#include <font5x7.hpp>
-#include <font7x10.hpp>
-#include <font11x16.hpp>
-#include <font16x26.hpp>
 
 #ifdef USE_HAL_DRIVER
 	#include "stm32g0xx.h"
@@ -24,6 +24,7 @@
 
 namespace ssd1306
 {
+
 
 enum class Colour: uint16_t
 {
@@ -44,10 +45,32 @@ public:
 	void fill(Colour colour);
 	void update_screen(void);
 	void draw_pixel(uint8_t x, uint8_t y, Colour colour);
-	char write_char(char ch, Font &font, Colour colour, int padding);
-	char write_string(std::stringstream &ss, Font &font, Colour colour, int padding);
-	char write(std::stringstream &msg, Font &font, uint8_t x, uint8_t y, Colour bg, Colour fg, int padding, bool update);
+
+	template<std::size_t SIZE> char write_char(
+		char ch, Font<SIZE> &font, 
+		Colour colour, 
+		int padding);
+	
+
+	template<std::size_t SIZE> char write_string(
+		std::stringstream &ss, 
+		Font<SIZE> &font, 
+		Colour colour, 
+		int padding);
+	
+
+	template<std::size_t SIZE> char write(
+		std::stringstream &msg, 
+		Font<SIZE> &font, 
+		uint8_t x, 
+		uint8_t y, 
+		Colour bg, 
+		Colour fg, 
+		int padding, 
+		bool update);
+
 	void set_cursor(uint8_t x, uint8_t y);
+
 
 private:
 	// Low-level procedures
@@ -77,6 +100,108 @@ private:
 #endif
 
 };
+
+template<std::size_t SIZE>
+char Display::write(std::stringstream &msg, Font<SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, int padding, bool update)
+{
+
+    fill(bg);
+    set_cursor(x, y);
+    char res = write_string(msg, font, fg, padding);
+    if (update)
+    {
+        update_screen();
+    }
+    return res;
+}
+
+template<std::size_t SIZE>
+char Display::write_char(char ch, Font<SIZE> &font, Colour color, int padding)
+{
+
+#ifndef USE_HAL_DRIVER
+    std::cout << ch << std::endl;
+#else
+    SEGGER_RTT_printf(0, "%c ", ch);
+#endif
+
+    // Check remaining space on current line
+    if (width <= (current_x + font.height()) ||
+        width <= (current_y + font.height()))
+    {
+        // Not enough space on current line
+        return 0;
+    }
+
+    // add extra leading horizontal space
+    if (padding == 1)
+    {
+    	for(size_t n = 0; n < font.height(); n++)
+		{
+			draw_pixel(current_x, (current_y + n), Colour::Black);
+		}
+    	current_x += 1;
+    }
+
+
+    // Use the font to write
+    uint32_t b;
+    for(size_t i = 0; i < font.height(); i++) {
+        b = font.get_pixel( (ch - 32) * font.height() + i );
+        for(size_t j = 0; j < font.width(); j++) {
+            if((b << j) & 0x8000)
+            {
+            	if (color == (Colour::White))
+            	{
+            		draw_pixel(current_x + j, (current_y + i), Colour::White);
+            	}
+            	else
+            	{
+            		draw_pixel(current_x + j, (current_y + i), Colour::Black);
+            	}
+            }
+            else
+            {
+            	if (color == (Colour::White))
+            	{
+            		draw_pixel(current_x + j, (current_y + i), Colour::Black);
+            	}
+            	else
+            	{
+            		draw_pixel(current_x + j, (current_y + i), Colour::White);
+            	}
+
+            }
+        }
+    }
+
+    // The current space is now taken
+    current_x += font.width();
+    // add extra leading horizontal space
+    if (padding == 1)
+    	current_x += 1;
+
+    // Return written char for validation
+    return ch;
+}
+
+template<std::size_t SIZE>
+char Display::write_string(std::stringstream &ss, Font<SIZE> &font, Colour color, int padding)
+{
+    // Write until null-byte
+	char ch;
+    while (ss.get(ch))
+    {
+        if (write_char(ch, font, color, padding) != ch)
+        {
+            // Char could not be written
+            return ch;
+        }
+    }
+
+    // Everything ok
+    return ch;
+}
 
 } // namespace ssd1306
 

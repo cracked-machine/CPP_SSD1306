@@ -13,54 +13,51 @@
 namespace ssd1306
 {
 
+template<std::size_t SIZE>
 class Font
 {
 
 public:
 
 	// @brief Construct a new Font object
-	// @param width font width, passed by derived class constructor
-	// @param height font height, passed by derived class constructor
-	Font(uint8_t width, uint8_t height) : m_width{width}, m_height{height} 
-	{
-	};
-	
-	// @brief Destroy the Font object
-	virtual ~Font() 
-	{
-	};
+	Font() = default;
 
-	// @brief Pure Virtual base function to get the char object.
-	// Must be overidden in derived font class.
+	// @brief function to get a font pixel (16bit half-word).
 	// @param idx The position in the font data array to retrieve data
 	// @return uint16_t The halfword of data we retrieve
-	virtual uint16_t get_char(size_t idx) = 0;
+	uint16_t get_pixel(size_t idx) { return data.at(idx); }
 
 	// @brief get the width member variable 
 	// @return uint8_t the width value
 	uint8_t width() { return m_width; }
 
-	// @brief get te height member variable 
+	// @brief get tte height member variable 
 	// @return uint8_t the height value
 	uint8_t height() { return m_height; }
 
-	// @brief Pure virtual helper function to get the size of the private font data array.
-	// The font data array size is implementation-specific and is stored in the derived class.
+	// @brief helper function to get the size of the private font data array.
 	// @return size_t the array size
-	virtual size_t size() = 0;
-
-protected:
-
-	// @brief The width of the font 
-	uint8_t m_width{0}; 
-
-	// @brief The height of the font 
-	uint8_t m_height{0};  
+	size_t size() { return data.size(); }
 
 private:
 
+	// @brief The width of the font in pixels
+	static uint8_t m_width; 
+
+	// @brief The height of the font in pixels
+	static uint8_t m_height;
+
+	// @brief the font data
+	static std::array<uint16_t, SIZE> data;
 
 };
+
+// specializations
+typedef Font<475> Font3x5;
+typedef Font<680> Font5x7;
+typedef Font<950> Font7x10;
+typedef Font<1710> Font11x16;
+typedef Font<2470> Font16x26;
 
 } // namespace ssd1306
 

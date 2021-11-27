@@ -116,15 +116,13 @@ bool Display::update_screen()
 
 bool Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
 {
-    if(x >= m_width || y >= m_height) {
-        // Don't write outside the buffer
-        return false;
-    }
-
     // Draw in the right color
-    if(color == Colour::White) {
+    if(color == Colour::White) 
+    {
         m_buffer[x + (y / 8) * m_width] |= 1 << (y % 8);
-    } else {
+    } 
+    else 
+    {
         m_buffer[x + (y / 8) * m_width] &= ~(1 << (y % 8));
     }
 

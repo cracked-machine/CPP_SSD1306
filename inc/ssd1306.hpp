@@ -134,7 +134,7 @@ private:
 	// @brief 
     static constexpr uint16_t m_height {64};
 
-	// @brief 
+	// @brief byte buffer for ssd1306
     std::array<uint8_t, (m_width*m_height)/8> m_buffer;
 	
 #ifdef USE_HAL_DRIVER
@@ -204,24 +204,25 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padd
 
 
     // Use the font to write
-    uint32_t b;
-    for(size_t i = 0; i < font.height(); i++) 
+    uint32_t font_data_word;
+    for(size_t font_height_idx = 0; font_height_idx < font.height(); font_height_idx++) 
 	{
-        if (!font.get_pixel( (ch - 32) * font.height() + i, b )) { return false; }
-        for(size_t j = 0; j < font.width(); j++) 
+        if (!font.get_pixel( (ch - 32) * font.height() + font_height_idx, font_data_word )) { return false; }
+
+        for(size_t font_width_idx = 0; font_width_idx < font.width(); font_width_idx++) 
 		{
-            if((b << j) & 0x8000)
+            if((font_data_word << font_width_idx) & 0x8000)
             {
             	if (color == (Colour::White))
             	{
-            		if (!draw_pixel(m_currentx + j, (m_currenty + i), Colour::White))
+            		if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White))
 					{
 						return false;
 					}
             	}
             	else
             	{
-            		if (!draw_pixel(m_currentx + j, (m_currenty + i), Colour::Black))
+            		if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black))
 					{
 						return false;
 					}
@@ -231,14 +232,14 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padd
             {
             	if (color == (Colour::White))
             	{
-            		if (!draw_pixel(m_currentx + j, (m_currenty + i), Colour::Black))
+            		if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black))
 					{
 						return false;
 					}
             	}
             	else
             	{
-            		if (!draw_pixel(m_currentx + j, (m_currenty + i), Colour::White))
+            		if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White))
 					{
 						return false;
 					}
@@ -250,9 +251,12 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padd
 
     // The current space is now taken
     m_currentx += font.width();
+
     // add extra leading horizontal space
-    if (padding == 1)
+    if (padding)
+	{
     	m_currentx += 1;
+	}
 
     // Return written char for validation
     return ch;

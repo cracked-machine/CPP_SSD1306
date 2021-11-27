@@ -13,7 +13,9 @@
 namespace ssd1306
 {
 
-template<std::size_t SIZE>
+	void thing();
+
+template<std::size_t FONT_SIZE>
 class Font
 {
 
@@ -25,7 +27,18 @@ public:
 	// @brief function to get a font pixel (16bit half-word).
 	// @param idx The position in the font data array to retrieve data
 	// @return uint16_t The halfword of data we retrieve
-	uint16_t get_pixel(size_t idx) { return data.at(idx); }
+	bool get_pixel(size_t idx, uint32_t &bit_line) 
+	{ 
+		if (idx > data.size())
+		{
+			return false;
+		}
+		else
+		{
+			bit_line = static_cast<uint32_t>(data.at(idx)); 
+			return true;
+		}
+	}
 
 	// @brief get the width member variable 
 	// @return uint8_t the width value
@@ -48,7 +61,7 @@ private:
 	static uint8_t m_height;
 
 	// @brief the font data
-	static std::array<uint16_t, SIZE> data;
+	static std::array<uint16_t, FONT_SIZE> data;
 
 };
 

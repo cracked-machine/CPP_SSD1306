@@ -5,20 +5,18 @@
  *      Author: chris
  */
 
+// https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf
 
 #include "ssd1306.hpp"
+#include <iomanip>
+#include <bitset>
 
 namespace ssd1306
 {
 
-Display::Display()
+bool Display::init(void)
 {
-	// do nothing else
-}
-
-
-void Display::init(void)
-{
+    bool res = true;
 	// Reset Display
 	reset();
 
@@ -27,57 +25,57 @@ void Display::init(void)
     HAL_Delay(100);
 #endif
     // Init Display
-    write_command(0xAE); //display off
+    if (!write_command(0xAE)) { return false; } //display off
 
-    write_command(0x20); //Set Memory Addressing Mode
-    write_command(0x10); // 00,Horizontal Addressing Mode; 01,Vertical Addressing Mode;
+    if (!write_command(0x20)) { return false; } //Set Memory Addressing Mode
+    if (!write_command(0x10)) { return false; } // 00,Horizontal Addressing Mode; 01,Vertical Addressing Mode;
                                 // 10,Page Addressing Mode (RESET); 11,Invalid
 
-    write_command(0xB0); //Set Page Start Address for Page Addressing Mode,0-7
+    if (!write_command(0xB0)) { return false; } //Set Page Start Address for Page Addressing Mode,0-7
 
 
-    write_command(0xC8); //Set COM Output Scan Direction
+    if (!write_command(0xC8)) { return false; } //Set COM Output Scan Direction
 
 
-    write_command(0x00); //---set low column address
-    write_command(0x10); //---set high column address
+    if (!write_command(0x00)) { return false; } //---set low column address
+    if (!write_command(0x10)) { return false; } //---set high column address
 
-    write_command(0x40); //--set start line address - CHECK
+    if (!write_command(0x40)) { return false; } //--set start line address - CHECK
 
-    write_command(0x81); //--set contrast control register - CHECK
-    write_command(0xFF);
-
-
-    write_command(0xA1); //--set segment re-map 0 to 127 - CHECK
+    if (!write_command(0x81)) { return false; } //--set contrast control register - CHECK
+    if (!write_command(0xFF)) { return false; }
 
 
+    if (!write_command(0xA1)) { return false; } //--set segment re-map 0 to 127 - CHECK
 
-    write_command(0xA6); //--set normal color
 
 
-    write_command(0xA8); //--set multiplex ratio(1 to 64) - CHECK
-    write_command(0x3F); //
+    if (!write_command(0xA6)) { return false; } //--set normal color
 
-    write_command(0xA4); //0xa4,Output follows RAM content;0xa5,Output ignores RAM content
 
-    write_command(0xD3); //-set display offset - CHECK
-    write_command(0x00); //-not offset
+    if (!write_command(0xA8)) { return false; } //--set multiplex ratio(1 to 64) - CHECK
+    if (!write_command(0x3F)) { return false; } //
 
-    write_command(0xD5); //--set display clock divide ratio/oscillator frequency
-    write_command(0xF0); //--set divide ratio
+    if (!write_command(0xA4)) { return false; } //0xa4,Output follows RAM content;0xa5,Output ignores RAM content
 
-    write_command(0xD9); //--set pre-charge period
-    write_command(0x22); //
+    if (!write_command(0xD3)) { return false; } //-set display offset - CHECK
+    if (!write_command(0x00)) { return false; } //-not offset
 
-    write_command(0xDA); //--set com pins hardware configuration - CHECK
-    write_command(0x12);
+    if (!write_command(0xD5)) { return false; } //--set display clock divide ratio/oscillator frequency
+    if (!write_command(0xF0)) { return false; } //--set divide ratio
 
-    write_command(0xDB); //--set vcomh
-    write_command(0x20); //0x20,0.77xVcc
+    if (!write_command(0xD9)) { return false; } //--set pre-charge period
+    if (!write_command(0x22)) { return false; } //
 
-    write_command(0x8D); //--set DC-DC enable
-    write_command(0x14); //
-    write_command(0xAF); //--turn on Display panel
+    if (!write_command(0xDA)) { return false; } //--set com pins hardware configuration - CHECK
+    if (!write_command(0x12)) { return false; }
+
+    if (!write_command(0xDB)) { return false; } //--set vcomh
+    if (!write_command(0x20)) { return false; } //0x20,0.77xVcc
+
+    if (!write_command(0x8D)) { return false; } //--set DC-DC enable
+    if (!write_command(0x14)) { return false; } //
+    if (!write_command(0xAF)) { return false; } //--turn on Display panel
 
     // Clear screen
     fill(Colour::Black);
@@ -86,55 +84,73 @@ void Display::init(void)
     update_screen();
 
     // Set default values for screen object
-    current_x = 0;
-    current_y = 0;
+    m_currentx = 0;
+    m_currenty = 0;
 
-    initialized = 1;
+    m_initialized = 1;
+
+    return res;
 }
 
 
 void Display::fill(Colour color)
 {
-    for(auto &pixel : buffer)
+    for(auto &pixel : m_buffer)
     {
         pixel = (color == Colour::Black) ? 0x00 : 0xFF;
     }
 }
 
-void Display::update_screen(void)
+bool Display::update_screen(void)
 {
     for(uint8_t i = 0; i < 8; i++)
     {
-        write_command(0xB0 + i);
-        write_command(0x00);
-        write_command(0x10);
-        write_data(&buffer[width * i], width);
+        if (!write_command(0xB0 + i)) { return false; }
+        if (!write_command(0x00)) { return false; }
+        if (!write_command(0x10)) { return false; }
+        if (!write_data(&m_buffer[m_width * i], m_width)) { return false; }
     }
+    return true;
 }
 
-void Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
+bool Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
 {
-    if(x >= width || y >= height) {
+    if(x >= m_width || y >= m_height) {
         // Don't write outside the buffer
-        return;
+        return false;
     }
 
     // Draw in the right color
     if(color == Colour::White) {
-        buffer[x + (y / 8) * width] |= 1 << (y % 8);
+        m_buffer[x + (y / 8) * m_width] |= 1 << (y % 8);
     } else {
-        buffer[x + (y / 8) * width] &= ~(1 << (y % 8));
+        m_buffer[x + (y / 8) * m_width] &= ~(1 << (y % 8));
     }
+
+    return true;
 }
 
-void Display::set_cursor(uint8_t x, uint8_t y)
+bool Display::set_cursor(uint8_t x, uint8_t y)
+{ 
+    if(x >= m_width || y >= m_height) 
+    {
+        return false;
+    }
+    else
+    {
+        m_currentx = x;
+        m_currenty = y;
+    }
+    return true;
+}
+
+void Display::print_buffer_stdout()
 {
-    current_x = x;
-    current_y = y;
+
+
 }
 
 
-// Low-level procedures
 void Display::reset(void)
 {
 	// CS = High (not selected)
@@ -142,35 +158,50 @@ void Display::reset(void)
 
 	// Reset the Display
 #ifdef USE_HAL_DRIVER
-	HAL_GPIO_WritePin(reset_port, reset_pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(m_reset_port, m_reset_pin, GPIO_PIN_RESET);
 	HAL_Delay(10);
-	HAL_GPIO_WritePin(reset_port, reset_pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(m_reset_port, m_reset_pin, GPIO_PIN_SET);
 	HAL_Delay(10);
 #endif
 }
 
-void Display::write_command(uint8_t cmd_byte __attribute__((unused)))
+bool Display::write_command(uint8_t cmd_byte __attribute__((unused)))
 {
 #ifdef USE_HAL_DRIVER
-	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select Display
-	HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_RESET); // command
-	HAL_SPI_Transmit(&spi_port, (uint8_t *) &cmd_byte, 1, HAL_MAX_DELAY);
-	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select Display
+    HAL_StatusTypeDef res = HAL_OK;
+	//HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_RESET); // select Display
+	HAL_GPIO_WritePin(m_dc_port, m_dc_pin, GPIO_PIN_RESET); // command
+	res = HAL_SPI_Transmit(&m_spi_port, (uint8_t *) &cmd_byte, 1, HAL_MAX_DELAY);
+    if (res != HAL_OK)
+    {
+        return false;
+    }
+    return true;
+	//HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_SET); // un-select Display
 #else
- 
+    return true;
 #endif
 }
 
-void Display::write_data(uint8_t* data_buffer __attribute__((unused)), size_t data_buffer_size __attribute__((unused)))
+bool Display::write_data(uint8_t* data_buffer __attribute__((unused)), size_t data_buffer_size __attribute__((unused)))
 {
 #ifdef USE_HAL_DRIVER
-	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_RESET); // select Display
-	HAL_GPIO_WritePin(dc_port, dc_pin, GPIO_PIN_SET); // data
-	HAL_SPI_Transmit(&spi_port, data_buffer, data_buffer_size, HAL_MAX_DELAY);
-	//HAL_GPIO_WritePin(cs_port, cs_pin, GPIO_PIN_SET); // un-select Display
+    HAL_StatusTypeDef res = HAL_OK;
+	//HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_RESET); // select Display
+	HAL_GPIO_WritePin(m_dc_port, m_dc_pin, GPIO_PIN_SET); // data
+	res = HAL_SPI_Transmit(&m_spi_port, data_buffer, data_buffer_size, HAL_MAX_DELAY);
+    if (res != HAL_OK)
+    {
+        return false;
+    }
+    return true;
+	//HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_SET); // un-select Display
 #else
-
+    return true;
 #endif
-}
+
+
+
+} 
 
 } // namespace ssd1306

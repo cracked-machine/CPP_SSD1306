@@ -70,35 +70,35 @@ TEST_CASE("Test Display", "[ssd1306_display]")
     
 
     
-    SECTION("Write white on black with padding == 1")
+    SECTION("Write white on black")
     {
         std::stringstream text("TEST");
-        REQUIRE(oled.write(text, font, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, 1, true));
+        REQUIRE(oled.write(text, font, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, true, true));
     }
-    SECTION("Write white on black with padding == 1")
+    SECTION("Write black on white")
     {
         std::stringstream text("TEST");
-        REQUIRE(oled.write(text, font, 2, 2, ssd1306::Colour::White, ssd1306::Colour::Black, 1, true));
+        REQUIRE(oled.write(text, font, 2, 2, ssd1306::Colour::White, ssd1306::Colour::Black, true, true));
     }
     SECTION("Write with invalid x position")
     {
         std::stringstream text("TEST");
-        REQUIRE_FALSE(oled.write(text, font, 255, 2, ssd1306::Colour::Black, ssd1306::Colour::White, 3, true));
+        REQUIRE_FALSE(oled.write(text, font, 255, 2, ssd1306::Colour::Black, ssd1306::Colour::White, true, true));
     }
     SECTION("Write with invalid y position")
     {
         std::stringstream text("TEST");
-        REQUIRE_FALSE(oled.write(text, font, 2, 255, ssd1306::Colour::Black, ssd1306::Colour::White, 3, true));
+        REQUIRE_FALSE(oled.write(text, font, 2, 255, ssd1306::Colour::Black, ssd1306::Colour::White, true, true));
     }
     SECTION("Write invalid char")
     {
-        REQUIRE_FALSE(oled.write_char(0, font, ssd1306::Colour::Black, 3));
+        REQUIRE_FALSE(oled.write_char(0, font, ssd1306::Colour::Black, true));
     }
 
-    SECTION("Write invalid string")
+    SECTION("Write uninitialised string")
     {
         std::stringstream text;
-        REQUIRE_FALSE(oled.write_string(text, font, ssd1306::Colour::White, 3));
+        REQUIRE_FALSE(oled.write_string(text, font, ssd1306::Colour::White, true));
     }
     
     

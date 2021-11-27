@@ -42,11 +42,11 @@ Very basic test: flashing text!
     while(true)
     {
       std::stringstream msg("TEST");
-      oled.write(msg, font, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, 3, true);
+      oled.write(msg, font, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);
       HAL_Delay(1000);
 
       std::stringstream msg("");
-      oled.write(msg, font, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, 3, true);
+      oled.write(msg, font, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);
       HAL_Delay(1000);
     }
   }

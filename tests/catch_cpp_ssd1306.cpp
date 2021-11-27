@@ -86,9 +86,12 @@ TEST_CASE("Test Display public API", "[ssd1306_display_public]")
     }
     SECTION("Write with invalid y position")
     {
+
         std::stringstream text("TEST");
         REQUIRE_FALSE(oled.write(text, font, 2, 255, ssd1306::Colour::Black, ssd1306::Colour::White, true, true));
     }
+
+
    
 }
 
@@ -107,12 +110,39 @@ TEST_CASE("Test Display protected API", "[ssd1306_display_protected]")
         ssd1306::ssd1306_tester tester;
         REQUIRE_FALSE(tester.test_write_string(text, font, ssd1306::Colour::White, true));
     }
+}
 
-    SECTION("Print buffer")
+TEST_CASE("Check font output", "[font_check]")
+{
+
+    SECTION("Print buffer as hex")
     {
+        static ssd1306::Font16x26 font;
         ssd1306::ssd1306_tester tester;
         std::stringstream text("TEST");
         REQUIRE(tester.write(text, font, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, true, true));
+#ifdef ENABLE_SSD1306_STDOUT
         tester.print_buffer_data();
+#endif
+        
+    }
+
+    SECTION("Print individual characters to stdout")
+    {
+        static ssd1306::Font16x26 font;
+        ssd1306::ssd1306_tester tester;
+        for (uint8_t count = 0; count < font.character_map.size(); count++)
+        {
+            std::stringstream msg;
+	        msg << font.character_map[count];
+
+#ifdef ENABLE_SSD1306_STDOUT
+            std::cout << std::endl << std::endl << "---" << std::endl << "|" << 
+                font.character_map[count] << "|" << std::endl << "---" << std::endl <<
+                " ^ " << std::endl << " | " << std::endl;
+#endif
+		    tester.write(msg, font, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);
+
+        }
     }
 }

@@ -13,8 +13,6 @@
 namespace ssd1306
 {
 
-	void thing();
-
 template<std::size_t FONT_SIZE>
 class Font
 {

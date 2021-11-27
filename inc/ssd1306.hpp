@@ -219,12 +219,16 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padd
     	m_currentx += 1;
     }
 
-
     // Use the font to write
     uint32_t font_data_word;
     for(size_t font_height_idx = 0; font_height_idx < font.height(); font_height_idx++) 
 	{
         if (!font.get_pixel( (ch - 32) * font.height() + font_height_idx, font_data_word )) { return false; }
+
+#ifdef ENABLE_SSD1306_STDOUT
+		// separator for the font
+        std::cout << std::endl;
+#endif
 
         for(size_t font_width_idx = 0; font_width_idx < font.width(); font_width_idx++) 
 		{
@@ -264,6 +268,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padd
 
             }
         }
+
     }
 
     // The current space is now taken

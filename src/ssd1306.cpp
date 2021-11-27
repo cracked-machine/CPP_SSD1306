@@ -120,10 +120,16 @@ bool Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
     if(color == Colour::White) 
     {
         m_buffer[x + (y / 8) * m_width] |= 1 << (y % 8);
+#ifdef ENABLE_SSD1306_STDOUT
+        std::cout << "1";
+#endif
     } 
     else 
     {
         m_buffer[x + (y / 8) * m_width] &= ~(1 << (y % 8));
+#ifdef ENABLE_SSD1306_STDOUT
+        std::cout << "_";
+#endif
     }
 
     return true;

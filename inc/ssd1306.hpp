@@ -71,7 +71,7 @@ public:
 	// @param update 
 	// @return char 
 	template<std::size_t FONT_SIZE> 
-	char write(std::stringstream &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, int padding, bool update);
+	char write(std::stringstream &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
 
 	// @brief 
 	// @tparam FONT_SIZE 
@@ -81,7 +81,7 @@ public:
 	// @param padding 
 	// @return char 
 	template<std::size_t FONT_SIZE> 
-	char write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour colour, int padding);
+	char write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour colour, bool padding);
 
 	// @brief 
 	// @tparam FONT_SIZE 
@@ -91,7 +91,7 @@ public:
 	// @param padding 
 	// @return char 
 	template<std::size_t FONT_SIZE> 
-	char write_char(char ch, Font<FONT_SIZE> &font, Colour colour, int padding);
+	char write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
 	
 	// @brief Set the cursor object
 	// @param x 
@@ -161,7 +161,7 @@ private:
 // Out-of-class definitions of member function templates 
 
 template<std::size_t FONT_SIZE>
-char Display::write(std::stringstream &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, int padding, bool update)
+char Display::write(std::stringstream &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update)
 {
 
     fill(bg);
@@ -178,7 +178,7 @@ char Display::write(std::stringstream &msg, Font<FONT_SIZE> &font, uint8_t x, ui
 }
 
 template<std::size_t FONT_SIZE>
-char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, int padding)
+char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padding)
 {
 
     // Check remaining space on current line
@@ -190,7 +190,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, int paddi
     }
 
     // add extra leading horizontal space
-    if (padding == 1)
+    if (padding)
     {
     	for(size_t n = 0; n < font.height(); n++)
 		{
@@ -205,9 +205,11 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, int paddi
 
     // Use the font to write
     uint32_t b;
-    for(size_t i = 0; i < font.height(); i++) {
+    for(size_t i = 0; i < font.height(); i++) 
+	{
         if (!font.get_pixel( (ch - 32) * font.height() + i, b )) { return false; }
-        for(size_t j = 0; j < font.width(); j++) {
+        for(size_t j = 0; j < font.width(); j++) 
+		{
             if((b << j) & 0x8000)
             {
             	if (color == (Colour::White))
@@ -257,7 +259,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, int paddi
 }
 
 template<std::size_t FONT_SIZE>
-char Display::write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour color, int padding)
+char Display::write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
 {
     // Write until null-byte
 	char ch;

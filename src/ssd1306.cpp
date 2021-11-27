@@ -143,12 +143,6 @@ bool Display::set_cursor(uint8_t x, uint8_t y)
     return true;
 }
 
-void Display::print_buffer_stdout()
-{
-
-
-}
-
 
 void Display::reset()
 {

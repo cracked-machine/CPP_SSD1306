@@ -43,21 +43,11 @@ class Display
 public:
 	Display() = default;
 
+	virtual ~Display() = default;
+
 	// @brief 
 	bool init();
 
-	// @brief 
-	// @param colour 
-	void fill(Colour colour);
-
-	// @brief 
-	bool update_screen();
-
-	// @brief 
-	// @param x 
-	// @param y 
-	// @param colour 
-	bool draw_pixel(uint8_t x, uint8_t y, Colour colour);
 
 	// @brief 
 	// @tparam FONT_SIZE 
@@ -73,40 +63,39 @@ public:
 	template<std::size_t FONT_SIZE> 
 	char write(std::stringstream &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
 
+
+	// @brief Get the display width. Can be used to create a std::array
+	// @return constexpr uint16_t 
+	static constexpr uint16_t get_display_width() { return m_width; }
+
+	// @brief Get the display height. Can be used to create a std::array
+	// @return constexpr uint16_t 
+	static constexpr uint16_t get_display_height() { return m_height; }
+
+private:
+	
 	// @brief 
-	// @tparam FONT_SIZE 
-	// @param ss 
-	// @param font 
+	// @param x 
+	// @param y 
 	// @param colour 
-	// @param padding 
-	// @return char 
-	template<std::size_t FONT_SIZE> 
-	char write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour colour, bool padding);
+	bool draw_pixel(uint8_t x, uint8_t y, Colour colour);
 
 	// @brief 
-	// @tparam FONT_SIZE 
-	// @param ch 
-	// @param font 
 	// @param colour 
-	// @param padding 
-	// @return char 
-	template<std::size_t FONT_SIZE> 
-	char write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
+	void fill(Colour colour);
+
+	// @brief 
+	bool update_screen();
+
+	// @brief 
+	void reset();
 	
 	// @brief Set the cursor object
 	// @param x 
 	// @param y 
 	bool set_cursor(uint8_t x, uint8_t y);
 
-	// @brief 
-	void print_buffer_stdout();
 
-
-private:
-	
-	// @brief 
-	void reset();
-	
 	// @brief 
 	// @param cmd_byte 
 	bool write_command(uint8_t cmd_byte);
@@ -128,11 +117,11 @@ private:
 	// @brief 
     uint8_t m_initialized {0};
 
-	// @brief 
-    static constexpr uint16_t m_width {128};
+	// @brief The display width in bytes. Used in std::array.
+    static const uint16_t m_width {128};
 
-	// @brief 
-    static constexpr uint16_t m_height {64};
+	// @brief The display height, in bytes. Used in std::array.
+    static const uint16_t m_height {64};
 
 	// @brief byte buffer for ssd1306
     std::array<uint8_t, (m_width*m_height)/8> m_buffer;
@@ -155,6 +144,34 @@ private:
 	uint16_t m_reset_pin {SPI1_RESET_Pin};
 
 #endif
+
+protected:
+
+	// @brief 
+	// @tparam FONT_SIZE 
+	// @param ss 
+	// @param font 
+	// @param colour 
+	// @param padding 
+	// @return char 
+	template<std::size_t FONT_SIZE> 
+	char write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour colour, bool padding);
+
+	// @brief 
+	// @tparam FONT_SIZE 
+	// @param ch 
+	// @param font 
+	// @param colour 
+	// @param padding 
+	// @return char 
+	template<std::size_t FONT_SIZE> 
+	char write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
+	
+
+	// @brief Get the buffer object. Used for testing only.
+	// @notes use
+	// @param buffer 
+	void get_buffer(std::array<uint8_t, (m_width*m_height)/8> &buffer) { buffer = m_buffer; }
 
 };
 

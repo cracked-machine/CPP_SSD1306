@@ -1,6 +1,7 @@
 
 #include <catch2/catch_all.hpp>
 #include <ssd1306.hpp>
+#include <ssd1306_tester.hpp>
 
 TEST_CASE("Test Fonts", "[ssd1306_fonts]")
 {
@@ -62,13 +63,11 @@ TEST_CASE("Test Fonts", "[ssd1306_fonts]")
 
 }
 
-TEST_CASE("Test Display", "[ssd1306_display]")
+TEST_CASE("Test Display public API", "[ssd1306_display_public]")
 {
     static ssd1306::Font16x26 font;
     static ssd1306::Display oled;
     REQUIRE(oled.init());
-    
-
     
     SECTION("Write white on black")
     {
@@ -90,17 +89,30 @@ TEST_CASE("Test Display", "[ssd1306_display]")
         std::stringstream text("TEST");
         REQUIRE_FALSE(oled.write(text, font, 2, 255, ssd1306::Colour::Black, ssd1306::Colour::White, true, true));
     }
+   
+}
+
+TEST_CASE("Test Display protected API", "[ssd1306_display_protected]")
+{
+    static ssd1306::Font16x26 font;
     SECTION("Write invalid char")
     {
-        REQUIRE_FALSE(oled.write_char(0, font, ssd1306::Colour::Black, true));
+        ssd1306::ssd1306_tester tester;
+        REQUIRE_FALSE(tester.test_write_char(0, font, ssd1306::Colour::Black, true));
     }
 
     SECTION("Write uninitialised string")
     {
         std::stringstream text;
-        REQUIRE_FALSE(oled.write_string(text, font, ssd1306::Colour::White, true));
+        ssd1306::ssd1306_tester tester;
+        REQUIRE_FALSE(tester.test_write_string(text, font, ssd1306::Colour::White, true));
     }
-    
-    
-    oled.print_buffer_stdout();
+
+    SECTION("Print buffer")
+    {
+        ssd1306::ssd1306_tester tester;
+        std::stringstream text("TEST");
+        REQUIRE(tester.write(text, font, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, true, true));
+        tester.print_buffer_data();
+    }
 }

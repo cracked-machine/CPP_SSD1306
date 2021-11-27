@@ -5,6 +5,7 @@
  *      Author: chris
  */
 
+// @note See datasheet
 // https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf
 
 #include "ssd1306.hpp"
@@ -14,7 +15,7 @@
 namespace ssd1306
 {
 
-bool Display::init(void)
+bool Display::init()
 {
     bool res = true;
 	// Reset Display
@@ -101,7 +102,7 @@ void Display::fill(Colour color)
     }
 }
 
-bool Display::update_screen(void)
+bool Display::update_screen()
 {
     for(uint8_t i = 0; i < 8; i++)
     {
@@ -151,7 +152,7 @@ void Display::print_buffer_stdout()
 }
 
 
-void Display::reset(void)
+void Display::reset()
 {
 	// CS = High (not selected)
 	//HAL_GPIO_WritePin(Display_CS_Port, Display_CS_Pin, GPIO_PIN_SET);

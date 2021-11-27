@@ -5,6 +5,9 @@
  *      Author: chris
  */
 
+// @note See datasheet
+// https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf
+
 #ifndef Display_HPP_
 #define Display_HPP_
 
@@ -41,14 +44,14 @@ public:
 	Display() = default;
 
 	// @brief 
-	bool init(void);
+	bool init();
 
 	// @brief 
 	// @param colour 
 	void fill(Colour colour);
 
 	// @brief 
-	bool update_screen(void);
+	bool update_screen();
 
 	// @brief 
 	// @param x 
@@ -102,7 +105,7 @@ public:
 private:
 	
 	// @brief 
-	void reset(void);
+	void reset();
 	
 	// @brief 
 	// @param cmd_byte 

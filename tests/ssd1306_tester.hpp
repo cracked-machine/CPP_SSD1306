@@ -37,8 +37,6 @@ public:
     bool print_buffer_data();
 
 private:
-    // @brief The font size under test
-    ssd1306::Font16x26 m_font;
 
     // @brief used to calculate display size
     static const size_t byte_size {8};

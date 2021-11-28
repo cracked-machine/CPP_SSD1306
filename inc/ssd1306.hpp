@@ -213,7 +213,7 @@ char Display::write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour 
 }
 
 template<std::size_t FONT_SIZE>
-char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padding)
+char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding)
 {
 
     // Check remaining space on current line
@@ -252,43 +252,43 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padd
 		{
             if((font_data_word << font_width_idx) & 0x8000)
             {
-            	
-				if (color == (Colour::White))
-            	{
-            		if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White))
-					{
-						return false;
-					}
-            	}
-            	else
-            	{
-            		if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black))
-					{
-						return false;
-					}
-            	}
-				
+            	switch (colour)
+				{
+					case Colour::White:
+						if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White))
+						{
+							return false;
+						}
+						break;
+					
+					case Colour::Black:
+						if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black))
+						{
+							return false;
+						}
+						break;
+				}			
             }
             else
             {
-            	if (color == (Colour::White))
-            	{
-            		if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black))
-					{
-						return false;
-					}
-            	}
-            	else
-            	{
-            		if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White))
-					{
-						return false;
-					}
-            	}
-
+            	switch (colour)
+				{
+					case Colour::White:
+						if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black))
+						{
+							return false;
+						}
+						break;
+					
+					case Colour::Black:
+						if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White))
+						{
+							return false;
+						}
+						break;
+				}						
             }
         }
-
     }
 
     // The current space is now taken

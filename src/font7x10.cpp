@@ -4,9 +4,29 @@
 namespace ssd1306
 {
 
+// 7x10 - '1'
+// 9 LSB DONT CARE
+//
+// - - - o - - - x x x x x x x x x	0x1000  ROW #0
+// - - o o - - - x x x x x x x x x	0x3000  ROW #1
+// - o - o - - - x x x x x x x x x	0x5000  ROW #2
+// - - - o - - - x x x x x x x x x	0x1000  ROW #3
+// - - - o - - - x x x x x x x x x	0x1000  ROW #4
+// - - - o - - - x x x x x x x x x	0x1000  ROW #5
+// - - - o - - - x x x x x x x x x	0x1000  ROW #6
+// - - - o - - - x x x x x x x x x	0x1000  ROW #7
+// - - - - - - - x x x x x x x x x	0x0000  ROW #8
+// - - - - - - - x x x x x x x x x	0x0000  ROW #9
+
+// @brief only 7 MSB of each halfword are used. 1 bit per col.
 template<> uint8_t Font7x10::m_width{7};
+
+// @brief 10 rows of two bytes (half-words)    
 template<> uint8_t Font7x10::m_height{10};
+
+// @brief The font data, top to bottom.
 template<> std::array<uint16_t, 950> Font7x10::data {
+//  ROW #0  ROW #1  ROW #2  ROW #3  ROW #4  ROW #5  ROW #6  ROW #7  ROW #8  ROW #9
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // sp
     0x1000, 0x1000, 0x1000, 0x1000, 0x1000, 0x1000, 0x0000, 0x1000, 0x0000, 0x0000,  // !
     0x2800, 0x2800, 0x2800, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0xFFFF,  // "

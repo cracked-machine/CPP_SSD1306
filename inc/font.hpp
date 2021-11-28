@@ -77,10 +77,10 @@ private:
 };
 
 // specializations
-typedef Font<475> Font3x5;
+typedef Font<475> Font5x5;
 typedef Font<680> Font5x7;
 typedef Font<950> Font7x10;
-typedef Font<1710> Font11x16;
+typedef Font<1710> Font11x18;
 typedef Font<2470> Font16x26;
 
 } // namespace ssd1306

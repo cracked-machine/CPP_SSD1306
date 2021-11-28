@@ -8,7 +8,7 @@ TEST_CASE("Test Fonts", "[ssd1306_fonts]")
 
     SECTION("3x5Font")
     {
-        static ssd1306::Font3x5 test_font;
+        static ssd1306::Font5x5 test_font;
         REQUIRE(test_font.width() == 5);
         REQUIRE(test_font.height() == 5);
         REQUIRE(test_font.size() == 475);
@@ -24,8 +24,8 @@ TEST_CASE("Test Fonts", "[ssd1306_fonts]")
         REQUIRE(test_font.height() == 7);
         REQUIRE(test_font.size() == 680);   
         uint32_t result{0};     
-        REQUIRE(test_font.get_pixel(200, result));
-        REQUIRE(result ==  20480);
+        REQUIRE(test_font.get_pixel(7, result));
+        REQUIRE(result ==  0x1000);
     }    
 
     SECTION("7x10Font")
@@ -41,9 +41,9 @@ TEST_CASE("Test Fonts", "[ssd1306_fonts]")
 
     SECTION("11x16Font")
     {
-        static ssd1306::Font11x16 test_font;
+        static ssd1306::Font11x18 test_font;
         REQUIRE(test_font.width() == 11);
-        REQUIRE(test_font.height() == 16);
+        REQUIRE(test_font.height() == 18);
         REQUIRE(test_font.size() == 1710);
         uint32_t result{0};
         REQUIRE(test_font.get_pixel(179, result));
@@ -129,7 +129,7 @@ TEST_CASE("Check font output", "[font_check]")
 
     SECTION("Print individual characters to stdout")
     {
-        static ssd1306::Font16x26 font;
+        static ssd1306::Font5x7 font;
         ssd1306::ssd1306_tester tester;
         for (uint8_t count = 0; count < font.character_map.size(); count++)
         {
@@ -138,7 +138,8 @@ TEST_CASE("Check font output", "[font_check]")
 
 #ifdef ENABLE_SSD1306_STDOUT
             std::cout << std::endl << std::endl << "---" << std::endl << "|" << 
-                font.character_map[count] << "|" << std::endl << "---" << std::endl <<
+                font.character_map[count] << 
+                "|" << std::endl << "---" << std::endl <<
                 " ^ " << std::endl << " | " << std::endl;
 #endif
 		    tester.write(msg, font, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);

@@ -114,16 +114,6 @@ public:
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00        
     };
 
-private:
-
-    // @brief used to calculate display size
-    static const size_t byte_size {8};
-
-    // @brief calculate the display dimensions at compile time
-    static constexpr size_t display_size = get_display_width() * get_display_height() / byte_size;
-
-    // @brief local copy of the ssd1306::Display data buffer 
-    std::array<uint8_t, display_size> m_buffer;
 };
 
 

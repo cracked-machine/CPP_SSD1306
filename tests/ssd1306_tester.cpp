@@ -8,8 +8,6 @@
 namespace ssd1306
 {
 
-
-
 ssd1306_tester::ssd1306_tester()
 {
     REQUIRE(init());
@@ -32,7 +30,7 @@ bool ssd1306_tester::validate_buffer(std::vector<uint8_t> &validation_buffer)
     // write the font to the buffer
     write(msg, font_under_test, 0, 0, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);
 
-    get_buffer(m_buffer);
+    //get_buffer(m_buffer);
 
     auto valid_buffer_iter = validation_buffer.begin();
     auto valid_buffer_end = validation_buffer.end();
@@ -53,7 +51,7 @@ bool ssd1306_tester::validate_buffer(std::vector<uint8_t> &validation_buffer)
 
 bool ssd1306_tester::dump_buffer_as_hex()
 {
-    get_buffer(m_buffer);
+    //get_buffer(m_buffer);
     uint8_t row_count {0};
     uint8_t col_count {0};
 

@@ -122,9 +122,6 @@ private:
 
 	// @brief The display height, in bytes. Used in std::array.
     static const uint16_t m_height {64};
-
-	// @brief byte buffer for ssd1306
-    std::array<uint8_t, (m_width*m_height)/8> m_buffer;
 	
 #ifdef USE_HAL_DRIVER
 
@@ -146,6 +143,9 @@ private:
 #endif
 
 protected:
+
+	// @brief byte buffer for ssd1306. Access to derived classes like ssd1306_tester is permitted.
+    std::array<uint8_t, (m_width*m_height)/8> m_buffer;
 
 	// @brief 
 	// @tparam FONT_SIZE 
@@ -171,7 +171,7 @@ protected:
 	// @brief Get the buffer object. Used for testing only.
 	// @notes use
 	// @param buffer 
-	void get_buffer(std::array<uint8_t, (m_width*m_height)/8> &buffer) { buffer = m_buffer; }
+	//void get_buffer(std::array<uint8_t, (m_width*m_height)/8> &buffer) { buffer = m_buffer; }
 
 };
 

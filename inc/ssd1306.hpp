@@ -195,6 +195,24 @@ char Display::write(std::stringstream &msg, Font<FONT_SIZE> &font, uint8_t x, ui
 }
 
 template<std::size_t FONT_SIZE>
+char Display::write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
+{
+    // Write until null-byte
+	char ch;
+    while (ss.get(ch))
+    {
+        if (write_char(ch, font, color, padding) != ch)
+        {
+            // Char could not be written
+            return ch;
+        }
+    }
+
+    // Everything ok
+    return ch;
+}
+
+template<std::size_t FONT_SIZE>
 char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padding)
 {
 
@@ -225,7 +243,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padd
 	{
         if (!font.get_pixel( (ch - 32) * font.height() + font_height_idx, font_data_word )) { return false; }
 
-#ifdef ENABLE_SSD1306_STDOUT
+#ifdef ENABLE_SSD1306_TEST_STDOUT
 		// separator for the font
         std::cout << std::endl;
 #endif
@@ -234,7 +252,8 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padd
 		{
             if((font_data_word << font_width_idx) & 0x8000)
             {
-            	if (color == (Colour::White))
+            	
+				if (color == (Colour::White))
             	{
             		if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White))
 					{
@@ -248,6 +267,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padd
 						return false;
 					}
             	}
+				
             }
             else
             {
@@ -284,23 +304,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour color, bool padd
     return ch;
 }
 
-template<std::size_t FONT_SIZE>
-char Display::write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
-{
-    // Write until null-byte
-	char ch;
-    while (ss.get(ch))
-    {
-        if (write_char(ch, font, color, padding) != ch)
-        {
-            // Char could not be written
-            return ch;
-        }
-    }
 
-    // Everything ok
-    return ch;
-}
 
 } // namespace ssd1306
 

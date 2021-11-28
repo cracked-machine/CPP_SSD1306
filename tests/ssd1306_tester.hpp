@@ -6,6 +6,9 @@
 namespace ssd1306
 {
 
+// @brief Single font character = 0xDEADBEEF, use to test the sum validation of the ssd1306 buffer
+typedef Font<26> FontTest;
+
 // @brief Tester class inherits protected `ssd1106::Display::get_buffer()` accessor
 class ssd1306_tester : public ssd1306::Display
 {
@@ -34,7 +37,9 @@ public:
 
     // @brief prints the contents of the display buffer. Call write() first or buffer maybe empty.
     // @return always true 
-    bool print_buffer_data();
+    bool dump_buffer_as_hex();
+
+    bool validate_buffer(uint32_t expected_sum, uint32_t &actual_sum);
 
 private:
 

@@ -4,6 +4,8 @@
 namespace ssd1306
 {
 
+// Font7x10 is declared in font.hpp
+
 // 7x10 - '1'
 // 9 LSB DONT CARE
 //

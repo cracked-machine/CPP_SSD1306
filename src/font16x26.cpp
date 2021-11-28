@@ -4,6 +4,8 @@
 namespace ssd1306
 {
 
+// Font16x26 is declared in font.hpp
+
 // 16x26 - '1'
 // 0 LSB DONT CARE
 //

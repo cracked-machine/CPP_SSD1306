@@ -27,53 +27,30 @@ bool Display::init()
 #endif
     // Init Display
     if (!write_command(0xAE)) { return false; } //display off
-
     if (!write_command(0x20)) { return false; } //Set Memory Addressing Mode
-    if (!write_command(0x10)) { return false; } // 00,Horizontal Addressing Mode; 01,Vertical Addressing Mode;
-                                // 10,Page Addressing Mode (RESET); 11,Invalid
-
+    if (!write_command(0x10)) { return false; } // 00,Horizontal Addressing Mode; 01,Vertical Addressing Mode; 10,Page Addressing Mode (RESET); 11,Invalid
     if (!write_command(0xB0)) { return false; } //Set Page Start Address for Page Addressing Mode,0-7
-
-
     if (!write_command(0xC8)) { return false; } //Set COM Output Scan Direction
-
-
     if (!write_command(0x00)) { return false; } //---set low column address
     if (!write_command(0x10)) { return false; } //---set high column address
-
     if (!write_command(0x40)) { return false; } //--set start line address - CHECK
-
     if (!write_command(0x81)) { return false; } //--set contrast control register - CHECK
     if (!write_command(0xFF)) { return false; }
-
-
     if (!write_command(0xA1)) { return false; } //--set segment re-map 0 to 127 - CHECK
-
-
-
     if (!write_command(0xA6)) { return false; } //--set normal color
-
-
     if (!write_command(0xA8)) { return false; } //--set multiplex ratio(1 to 64) - CHECK
     if (!write_command(0x3F)) { return false; } //
-
     if (!write_command(0xA4)) { return false; } //0xa4,Output follows RAM content;0xa5,Output ignores RAM content
-
     if (!write_command(0xD3)) { return false; } //-set display offset - CHECK
     if (!write_command(0x00)) { return false; } //-not offset
-
     if (!write_command(0xD5)) { return false; } //--set display clock divide ratio/oscillator frequency
     if (!write_command(0xF0)) { return false; } //--set divide ratio
-
     if (!write_command(0xD9)) { return false; } //--set pre-charge period
     if (!write_command(0x22)) { return false; } //
-
     if (!write_command(0xDA)) { return false; } //--set com pins hardware configuration - CHECK
     if (!write_command(0x12)) { return false; }
-
     if (!write_command(0xDB)) { return false; } //--set vcomh
     if (!write_command(0x20)) { return false; } //0x20,0.77xVcc
-
     if (!write_command(0x8D)) { return false; } //--set DC-DC enable
     if (!write_command(0x14)) { return false; } //
     if (!write_command(0xAF)) { return false; } //--turn on Display panel

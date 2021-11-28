@@ -112,42 +112,30 @@ TEST_CASE("Check font output", "[dump_fonts][.]")
 
         // write the string to the buffer
         tester.write(msg, font_under_test, 0, 0, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);
-        std::cout << std::endl << "++++++++++++++++++++++++++++++++++++++++" << std::endl;
+        std::cout << std::endl << "+++++++++++++++++++++++++++++++++++++++++++++ BUFFER HEX DUMP ++++++++++++++++++++++++++++++++++++++++" << std::endl;
 
         // dump the hex
         tester.dump_buffer_as_hex();
-
-        // accumulate the sum of the buffer and add to results
-        uint32_t result {0};
-        tester.validate_buffer(0, result);
-        std::cout << std::endl << result << std::endl;
-
+        std::cout << std::endl;
     }
-
 }
 
-// @brief Validate the buffer encoding is correct using FontTest
+// @brief Validate the buffer encoding is correct using known valid encoding
 TEST_CASE("SSD1306 Buffer Validation", "[ssd1306_buffer_check]")
 {
-
     ssd1306::ssd1306_tester tester;
-    
+    std::vector<uint8_t> invalid_buffer(1024, 0x00);
+    std::vector<uint8_t> wrong_size_buffer(2);
     SECTION("Buffer Sum Validation for Font11x18")
     {
-        static ssd1306::FontTest font_under_test;
+        REQUIRE_FALSE(tester.validate_buffer(wrong_size_buffer));
+        REQUIRE(tester.validate_buffer(tester.m_valid_fonttest_buffer_contents));
+        REQUIRE_FALSE(tester.validate_buffer(invalid_buffer));
+    }
 
-        uint32_t font_test_sumcheck {9472};
-
-
-        // set the font character
-        std::stringstream msg;
-        msg << font_under_test.character_map[0];
-
-        // write the font to the buffer
-        tester.write(msg, font_under_test, 0, 0, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);
-        uint32_t __attribute__((unused)) result;
-        REQUIRE(tester.validate_buffer(font_test_sumcheck, result));
-    
+    SECTION("Dump Hex")
+    {
+        REQUIRE(tester.dump_buffer_as_hex());
     }
 }
 

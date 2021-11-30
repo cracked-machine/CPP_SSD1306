@@ -51,6 +51,7 @@ bool ssd1306_tester::validate_buffer(std::vector<uint8_t> &validation_buffer)
 
 bool ssd1306_tester::dump_buffer_as_hex()
 {
+#ifdef ENABLE_SSD1306_TEST_STDOUT    
     //get_buffer(m_buffer);
     uint8_t row_count {0};
     uint8_t col_count {0};
@@ -72,7 +73,7 @@ bool ssd1306_tester::dump_buffer_as_hex()
             col_count++;
         }
     }
-
+#endif
     return true;
 }
 

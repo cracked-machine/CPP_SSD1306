@@ -17,8 +17,8 @@ bool ssd1306_tester::validate_buffer(std::vector<uint8_t> &validation_buffer)
 {
     if (validation_buffer.size() != m_buffer.size())
     {
-        std::cout << "Validation buffer error - expected size: " << m_buffer.size() 
-            << ", actual size: " << validation_buffer.size() << std::endl;
+        //std::cout << "Validation buffer error - expected size: " << m_buffer.size() 
+        //    << ", actual size: " << validation_buffer.size() << std::endl;
         return false;
     }
 

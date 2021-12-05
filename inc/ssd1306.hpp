@@ -24,6 +24,8 @@
 	#include "stm32g0xx.h"
 	#include "main.h"
 	#include "spi.h"
+#else
+    #define UNUSED(X) (void)X 
 #endif
 
 

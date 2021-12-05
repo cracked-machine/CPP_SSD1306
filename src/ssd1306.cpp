@@ -141,7 +141,7 @@ void Display::reset()
 #endif
 }
 
-bool Display::write_command(uint8_t cmd_byte __attribute__((unused)))
+bool Display::write_command(uint8_t cmd_byte)
 {
 #ifdef USE_HAL_DRIVER
     HAL_StatusTypeDef res = HAL_OK;
@@ -155,11 +155,12 @@ bool Display::write_command(uint8_t cmd_byte __attribute__((unused)))
     return true;
 	//HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_SET); // un-select Display
 #else
+    UNUSED(cmd_byte);
     return true;
 #endif
 }
 
-bool Display::write_data(uint8_t* data_buffer __attribute__((unused)), size_t data_buffer_size __attribute__((unused)))
+bool Display::write_data(uint8_t* data_buffer, size_t data_buffer_size)
 {
 #ifdef USE_HAL_DRIVER
     HAL_StatusTypeDef res = HAL_OK;
@@ -173,6 +174,8 @@ bool Display::write_data(uint8_t* data_buffer __attribute__((unused)), size_t da
     return true;
 	//HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_SET); // un-select Display
 #else
+    UNUSED(data_buffer);
+    UNUSED(data_buffer_size);
     return true;
 #endif
 

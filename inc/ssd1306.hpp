@@ -21,9 +21,13 @@
 
 
 #ifdef USE_HAL_DRIVER
-	#include "stm32g0xx.h"
-	#include "main.h"
-	#include "spi.h"
+	// Required when using GCC 10.3.1 arm-none-eabi 
+	// warning: compound assignment with 'volatile'-qualified left operand is deprecated [-Wvolatile]
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wvolatile"
+		#include "main.h"
+		#include "spi.h"	
+	#pragma GCC diagnostic pop
 #else
     #define UNUSED(X) (void)X 
 #endif

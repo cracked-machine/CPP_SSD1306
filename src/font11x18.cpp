@@ -1,6 +1,6 @@
 #include <font.hpp>
 
-
+#ifdef _Font11x18_
 namespace ssd1306
 {
 
@@ -134,4 +134,6 @@ template<> std::array<uint16_t, 1710> Font11x18::data {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x3880, 0x7F80, 0x4700, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,   // ~
 };
 
-}
+} // namespace ssd1306
+
+#endif // _Font11x18_

@@ -8,7 +8,11 @@
 //#include <variant>
 //#include <fontdata.hpp>
 
-
+// #define _Font5x5_
+#define _Font5x7_
+// #define _Font7x10_
+// #define _Font11x18_
+// #define _Font16x26_
 
 namespace ssd1306
 {
@@ -77,11 +81,30 @@ private:
 };
 
 // specializations
-typedef Font<475> Font5x5;
-typedef Font<680> Font5x7;
-typedef Font<950> Font7x10;
-typedef Font<1710> Font11x18;
-typedef Font<2470> Font16x26;
+#ifdef _Font5x5_
+	typedef Font<475> Font5x5;
+#endif
+
+#ifdef _Font5x7_
+	typedef Font<680> Font5x7;
+#endif
+
+#ifdef _Font7x10_
+	typedef Font<950> Font7x10;
+#endif
+
+#ifdef _Font11x18_
+	typedef Font<1710> Font11x18;
+#endif
+
+#ifdef _Font16x26_
+	typedef Font<2470> Font16x26;
+#endif
+
+
+
+
+
 
 } // namespace ssd1306
 

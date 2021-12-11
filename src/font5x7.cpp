@@ -1,7 +1,7 @@
 #include <font.hpp>
 
 // @brief static member initializations for specialized template classes
-
+#ifdef _Font5x7_
 namespace ssd1306
 {
 
@@ -124,4 +124,6 @@ template<> std::array<uint16_t, 680> Font5x7::data {
     0x0000, 0x0000, 0x0000, 0x7400, 0x4C00, 0x0000, 0x0000  // ~
 };
 
-}
+} // namespace ssd1306
+
+#endif // _Font5x7_

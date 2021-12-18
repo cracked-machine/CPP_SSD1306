@@ -35,7 +35,7 @@
 
 
 
-#ifdef USE_HAL_DRIVER
+#if defined(USE_SSD1306_HAL_DRIVER) || defined(USE_SSD1306_LL_DRIVER)
 	// Required when using GCC 10.3.1 arm-none-eabi 
 	// warning: compound assignment with 'volatile'-qualified left operand is deprecated [-Wvolatile]
 	#pragma GCC diagnostic push
@@ -43,7 +43,9 @@
 		#include "main.h"
 		#include "spi.h"	
 	#pragma GCC diagnostic pop
-#else
+#endif
+// this macro is defined in HAL but we still need it when using LL or no stm32 framework
+#if !defined(USE_SSD1306_HAL_DRIVER)
     #define UNUSED(X) (void)X 
 #endif
 
@@ -87,7 +89,7 @@ public:
 
 	// @brief Get the display width. Can be used to create a std::array
 	// @return constexpr uint16_t 
-	static constexpr uint16_t get_display_width() { return m_width; }
+	static constexpr uint16_t get_display_width() { return m_page_width; }
 
 	// @brief Get the display height. Can be used to create a std::array
 	// @return constexpr uint16_t 
@@ -124,7 +126,7 @@ private:
 	// @brief 
 	// @param data_buffer 
 	// @param data_buffer_size 
-	bool write_data(uint8_t* data_buffer, size_t data_buffer_size);
+	bool write_data(uint16_t page_start_idx);
 
 	// @brief 
     uint16_t m_currentx {0};
@@ -138,13 +140,13 @@ private:
 	// @brief 
     uint8_t m_initialized {0};
 
-	// @brief The display width in bytes. Used in std::array.
-    static const uint16_t m_width {128};
+	// @brief The display width in bytes. Also the size of each GDDRAM page
+    static const uint16_t m_page_width {128};
 
-	// @brief The display height, in bytes. Used in std::array.
+	// @brief The display height, in bytes. Also the number of pages (8) multiplied by the bits per page column (8)
     static const uint16_t m_height {64};
 	
-#ifdef USE_HAL_DRIVER
+#ifdef USE_SSD1306_HAL_DRIVER
 
 	// @brief 
 	SPI_HandleTypeDef m_spi_port {hspi1};
@@ -166,7 +168,7 @@ private:
 protected:
 
 	// @brief byte buffer for ssd1306. Access to derived classes like ssd1306_tester is permitted.
-    std::array<uint8_t, (m_width*m_height)/8> m_buffer;
+    std::array<uint8_t, (m_page_width*m_height)/8> m_buffer;
 
 	// @brief 
 	// @tparam FONT_SIZE 
@@ -192,7 +194,7 @@ protected:
 	// @brief Get the buffer object. Used for testing only.
 	// @notes use
 	// @param buffer 
-	//void get_buffer(std::array<uint8_t, (m_width*m_height)/8> &buffer) { buffer = m_buffer; }
+	//void get_buffer(std::array<uint8_t, (m_page_width*m_height)/8> &buffer) { buffer = m_buffer; }
 
 };
 
@@ -238,8 +240,8 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool pad
 {
 
     // Check remaining space on current line
-    if (m_width <= (m_currentx + font.height()) ||
-        m_width <= (m_currenty + font.height()))
+    if (m_page_width <= (m_currentx + font.height()) ||
+        m_page_width <= (m_currenty + font.height()))
     {
         // Not enough space on current line
         return 0;

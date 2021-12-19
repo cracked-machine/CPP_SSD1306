@@ -175,6 +175,160 @@ private:
 
 #endif
 
+	// @brief SSD1306 Fundamental Commands - See Section 9 of datasheet for setting bytes
+	enum class fcmd
+	{
+		// @brief Double byte command to select 1 out of 256 contrast steps. 
+		// Contrast increases as the value increases. 
+		set_display_constrast = 	0x81,
+		// @brief Maximum display contrast value
+		max_constrast =			0xFF,
+		// @brief Minimum display contrast value
+		min_constrast = 		0x01,
+
+		// @brief Output follows RAM content
+		display_use_ram = 		0xA4,
+
+		// @brief Output ignores RAM content
+		display_ignore_ram = 	0xA5,
+
+		// @brief Normal display - 0 in RAM: OFF in display panel, 1 in RAM: ON in display panel
+		display_inverse_off = 	0xA6,
+
+		// @brief Inverse display - 1 in RAM: OFF in display panel, 0 in RAM: ON in display panel
+		display_inverse_on = 	0xA7,	
+
+		// @brief Display off (sleep mode)
+		display_mode_sleep =	0xAE,
+
+		// @brief Display on in normal mode
+		display_mode_normal =  	0xAF
+		
+	};
+
+	// @brief SSD1306 Scrolling Commands - See Section 9 of datasheet for setting bytes
+	enum class scmd
+	{
+		// @brief Right Horizontal Scroll
+		horiz_scroll_right = 	0x26,	
+		// @brief Left Horizontal Scroll
+		horiz_scroll_left = 	0x27,
+		// @brief Vertical and right Horizontal Scroll
+		both_scroll_right = 	0x29,
+		// @brief Vertical and left Horizontal Scroll
+		both_scroll_left = 		0x2A,
+		// @brief Start scrolling
+		activate_scroll = 		0x2F,
+		// @brief Stop scrolling
+		deactivate_scroll = 	0x2E,
+		// @brief Set Vertical scrolling area
+		vert_scroll_area = 		0xA3
+	};
+
+	// @brief SSD1306 Address Commands
+	enum class acmd
+	{	
+		// @brief Set the addressing mode - use one of the below modes (Page Address Mode supported only)
+		set_memory_mode = 		0x20,
+		// @brief Horizontal Addressing Mode
+		horiz_addr_mode = 		0x00,
+		// @brief Vertical Addressing Mode
+		vert_addr_mode = 		0x01,
+		// @brief Page Addressing Mode
+		page_addr_mode = 		0x02,
+
+		// @brief Start at Page #0
+		start_page_0 =			0xB0,
+		// @brief Start at Page #1
+		start_page_1 = 			0xB1,
+		// @brief Start at Page #2
+		start_page_2 = 			0xB2,
+		// @brief Start at Page #3
+		start_page_3 = 			0xB3,
+		// @brief Start at Page #4
+		start_page_4 = 			0xB4,
+		// @brief Start at Page #5
+		start_page_5 = 			0xB5,
+		// @brief Start at Page #6
+		start_page_6 = 			0xB6,
+		// @brief Start at Page #7
+		start_page_7 = 			0xB7,
+		
+		// @brief Start at lower column address - address position min
+		start_lcol_0 = 			0x00,
+		// @brief Start at lower column address - address position max
+		start_lcol_15 = 		0x0F,
+
+		// @brief Start at higher column address - address position min
+		start_hcol_0 = 			0x10,
+		// @brief Start at higher column address - address position max
+		start_hcol_15 =			0x1F
+
+	};	
+
+	// @brief SSD1306 Hardware Configuration (Panel resolution & layout related) Commands
+	enum class hwcmd
+	{
+		// @brief Set display RAM start line register from 0. Reset to this value during RESET.
+		start_line_0 = 			0x40,
+		// @brief Set display RAM start line register from 63.
+		start_line_31 =			0x7F,
+
+		// @brief Set segment remap: column address 0 is mapped to SEG0 (RESET)
+		horiz_flip_inverse = 	0xA0,
+		// @brief Set segment remap: column address 127 is mapped to SEG0 (RESET)		
+		horiz_flip_normal =		0xA1,
+
+		// @brief Set COM output scan direction: remapped mode. Scan from COM[N-1] to COM0 (where N is multiplex ratio).
+		vert_flip_inverse = 	0xC0,
+		// @brief Set COM output scan direction: normal mode. Scan from COM0 to COM[N-1] (where N is multiplex ratio).
+		vert_flip_normal = 		0xC8,
+
+		// @brief Set Multiplex Ratio with the next byte. Valid ranges: 16d -> 63d (0x10 -> 0x3F)
+		set_mux_ratio = 		0xA8,
+		default_mux_ratio = 	0x3F,
+
+		// @brief Set vertical COM shift. Valid ranges: 0d -> 63d (0x00 -> 0x3F).
+		set_vert_offset = 		0xD3,
+		vert_offset_none = 		0x00,	
+
+		// @brief Set COM Pins Hardware Configuration - See section 10.1.18 of datasheet.
+		set_com_pin_cfg	=		0xDA,
+		// @brief Sequential COM config + Enable COM Left/Right remap
+		com_pin_seq_remap_on =	0x22,
+		// @brief Sequential COM config + Disable COM Left/Right remap
+		com_pin_seq_remap_off = 0x02,
+		// @brief Alternative COM config + Enable COM Left/Right remap
+		com_pin_alt_remap_on =	0x32,
+		// @brief Alternative COM config + Disable COM Left/Right remap
+		com_pin_alt_remap_off = 0x12,
+
+	};
+
+	// @brief SSD1306 Timing & Driving Scheme Setting Commands
+	enum class tcmd
+	{
+		// @brief Set Display Clock Divide Ratio/Oscillator Frequency. [7:4] clk freq, [3:0] clk prescaler
+		clk_presc_freq = 		0xD5,
+		// @brief Max frequency, no prescaler
+		clk_max_setting = 		0xF0,	
+
+		// @brief Set the duration of the pre-charge period. 
+		set_precharge_period = 	0xD9,
+		default_precharge = 	0x22,
+
+		// @brief Set the VCOMH regulator output
+		set_vcomh_lvl =			0xDB,
+		// @brief ~ 0.65 x VCC
+		vcomh_vcc_065 = 		0x00,
+		// @brief ~ 0.77 x VCC (RESET)
+		vcomh_vcc_077 = 		0x20,
+		// @brief ~ 0.83 x VCC
+		vcomh_vcc_083 = 		0x30,
+
+	};
+
+
 protected:
 
 	// @brief byte buffer for ssd1306. Access to derived classes like ssd1306_tester is permitted.

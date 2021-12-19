@@ -45,34 +45,43 @@ bool Display::init()
         LL_mDelay(10);
     #endif
 
-    if (!send_command(0xAE)) { return false; } // display off
-    if (!send_command(0x20)) { return false; } // Set Memory Addressing Mode
-    if (!send_command(0x10)) { return false; } // 00,Horizontal Addressing Mode; 01,Vertical Addressing Mode; 10,Page Addressing Mode (RESET); 11,Invalid
-    if (!send_command(0xB0)) { return false; } // Set Page Start Address for Page Addressing Mode,0-7
-    if (!send_command(0xC8)) { return false; } // Set COM Output Scan Direction - 0xC0/0xC8 (mirror vertically)
-    if (!send_command(0x00)) { return false; } // set low column address
-    if (!send_command(0x10)) { return false; } // set high column address
-    if (!send_command(0x40)) { return false; } // set start line address
-    if (!send_command(0x81)) { return false; } // set contrast control register 
-    if (!send_command(0xFF)) { return false; } // set constrast value
-    if (!send_command(0xA1)) { return false; } // set segment re-map 0 to 127 - 0xA0/0xA1 (mirror horizontally)
-    if (!send_command(0xA6)) { return false; } // set normal color - 0xA6/0xA7 (colour inverse)
-    if (!send_command(0xA8)) { return false; } // set multiplex ratio(1 to 64)
-    if (!send_command(0x3F)) { return false; } //
-    if (!send_command(0xA4)) { return false; } // 0xA4 output follows RAM content, 0xA5 output ignores RAM content
-    if (!send_command(0xD3)) { return false; } // set display offset
-    if (!send_command(0x00)) { return false; } // not offset
-    if (!send_command(0xD5)) { return false; } // set display clock divide ratio/oscillator frequency
-    if (!send_command(0xF0)) { return false; } // set divide ratio
-    if (!send_command(0xD9)) { return false; } // set pre-charge period
-    if (!send_command(0x22)) { return false; } //
-    if (!send_command(0xDA)) { return false; } // set com pins hardware configuration
-    if (!send_command(0x12)) { return false; }
-    if (!send_command(0xDB)) { return false; } // set vcomh
-    if (!send_command(0x20)) { return false; } // 0x20,0.77xVcc
-    if (!send_command(0x8D)) { return false; } // set DC-DC enable
-    if (!send_command(0x14)) { return false; } //
-    if (!send_command(0xAF)) { return false; } // turn on Display panel
+    // put into sleep mode during setup, probably not needed
+    if (!send_command( static_cast<uint8_t>(fcmd::display_mode_sleep) )) { return false; } 
+
+    // set fundamental commands
+    if (!send_command( static_cast<uint8_t>(fcmd::display_use_ram) )) { return false; }
+    if (!send_command( static_cast<uint8_t>(fcmd::display_inverse_off) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(fcmd::set_display_constrast) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(fcmd::max_constrast) )) { return false; } 
+    
+    // set addressing setting commands
+    if (!send_command( static_cast<uint8_t>(acmd::set_memory_mode) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(acmd::page_addr_mode) )) { return false; }
+    if (!send_command( static_cast<uint8_t>(acmd::start_page_0) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(acmd::start_lcol_0) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(acmd::start_hcol_0) )) { return false; } 
+
+    // set hardware config commands
+    if (!send_command( static_cast<uint8_t>(hwcmd::start_line_0) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(hwcmd::vert_flip_normal) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(hwcmd::horiz_flip_normal) )) { return false; }     
+    if (!send_command( static_cast<uint8_t>(hwcmd::set_mux_ratio) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(hwcmd::default_mux_ratio) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(hwcmd::set_vert_offset) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(hwcmd::vert_offset_none) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(hwcmd::set_com_pin_cfg) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(hwcmd::com_pin_alt_remap_off) )) { return false; }
+    
+    // set timing/driving commands
+    if (!send_command( static_cast<uint8_t>(tcmd::clk_presc_freq) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(tcmd::clk_max_setting) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(tcmd::set_precharge_period) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(tcmd::default_precharge) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(tcmd::set_vcomh_lvl) )) { return false; } 
+    if (!send_command( static_cast<uint8_t>(tcmd::vcomh_vcc_077) )) { return false; } 
+
+    // wake up display
+    if (!send_command( static_cast<uint8_t>(fcmd::display_mode_normal) )) { return false; } 
 
     // Clear screen
     fill(Colour::White);
@@ -101,13 +110,13 @@ bool Display::update_screen()
     for(uint8_t page_idx = 0; page_idx < 8; page_idx++)
     {
         // Set Page position to write to: 0-7
-        if (!send_command(0xB0 + page_idx)) { return false; }
+        if (!send_command( static_cast<uint8_t>(acmd::start_page_0) + page_idx)) { return false; }
 
         // Set the lower start column address of pointer by command 00h~0Fh.
-        if (!send_command(0x00)) { return false; }
+        if (!send_command( static_cast<uint8_t>(acmd::start_lcol_0) )) { return false; }
 
         // Set the upper start column address of pointer by command 10h~1Fh
-        if (!send_command(0x10)) { return false; }
+        if (!send_command( static_cast<uint8_t>(acmd::start_hcol_0) )) { return false; }
 
         // the next page position within the GDDRAM buffer
         uint16_t page_pos_gddram {static_cast<uint16_t>( m_page_width * page_idx )};

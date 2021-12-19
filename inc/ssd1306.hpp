@@ -26,12 +26,9 @@
 #ifndef Display_HPP_
 #define Display_HPP_
 
-#include <variant>
 #include <font.hpp>
-#include <sstream>
-#include <iostream>
 #include <array>
-#include <utility>
+#include <string>
 
 
 
@@ -43,8 +40,11 @@
 		#include "main.h"
 		#include "spi.h"	
 	#pragma GCC diagnostic pop
+#else
+	// only used when unit testing on x86
+	#include <iostream>
 #endif
-// this macro is defined in HAL but we still need it when using LL or no stm32 framework
+// this macro is defined in HAL but we still need it when using LL or x86
 #if !defined(USE_SSD1306_HAL_DRIVER)
     #define UNUSED(X) (void)X 
 #endif
@@ -81,7 +81,7 @@ public:
 	// @param update write the sw buffer to the IC
 	// @return char 
 	template<std::size_t FONT_SIZE> 
-	char write(std::stringstream &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
+	bool write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
 
 
 	// @brief Get the display width. Can be used to create a std::array
@@ -92,9 +92,11 @@ public:
 	// @return constexpr uint16_t 
 	static constexpr uint16_t get_display_height() { return m_height; }
 
+#if defined(X86_UNIT_TESTING_ONLY) || defined(USE_RTT)
 	// @brief Debug function to display entire SW bufefr to console (uses RTT on arm, uses std::cout on x86) 
 	// @param hex display in hex or decimal values
 	void dump_buffer(bool hex);
+#endif
 
 private:
 	
@@ -130,6 +132,7 @@ private:
 	// @return true if success, false if error
 	bool write_data(uint16_t page_pos_gddram);
 
+#if defined(USE_SSD1306_LL_DRIVER)
 	// @brief Check and retry (with timeout) the SPIx_SR TXE register.
 	// @param delay_ms The timeout
 	// @return true if TX FIFO is empty, false if TX FIFO is full
@@ -139,6 +142,7 @@ private:
 	// @param delay_ms The timeout
 	// @return true if SPI bus is busy, false if SPI bus is not busy.
 	bool check_bsy_flag_status(uint32_t delay_ms = 1);
+#endif
 
 	// @brief X coordinate for writing to the display
     uint16_t m_currentx {0};
@@ -184,7 +188,7 @@ protected:
 	// @param padding 
 	// @return char 
 	template<std::size_t FONT_SIZE> 
-	char write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour colour, bool padding);
+	bool write_string(std::string &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);
 
 	// @brief 
 	// @tparam FONT_SIZE 
@@ -202,38 +206,34 @@ protected:
 // Out-of-class definitions of member function templates 
 
 template<std::size_t FONT_SIZE>
-char Display::write(std::stringstream &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update)
+bool Display::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update)
 {
-
+	bool success {true};
     fill(bg);
     if (!set_cursor(x, y))
 	{
 		return 0;
 	}
-    char res = write_string(msg, font, fg, padding);
-    if (update)
+    success = write_string(msg, font, fg, padding);
+    if ((success) && (update))
     {
         update_screen();
     }
-    return res;
+    return success;
 }
 
 template<std::size_t FONT_SIZE>
-char Display::write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
+bool Display::write_string(std::string &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
 {
     // Write until null-byte
-	char ch;
-    while (ss.get(ch))
-    {
-        if (write_char(ch, font, color, padding) != ch)
-        {
-            // Char could not be written
-            return ch;
-        }
-    }
-
-    // Everything ok
-    return ch;
+	for (char &c : ss)
+	{
+		if (write_char(c, font, color, padding) != c)
+		{
+			return false;
+		}
+	}
+    return true;
 }
 
 template<std::size_t FONT_SIZE>

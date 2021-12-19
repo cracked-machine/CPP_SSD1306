@@ -22,7 +22,6 @@
 
 #include <font.hpp>
 
-#ifdef _Font5x5_
 namespace ssd1306
 {
 
@@ -144,5 +143,3 @@ template<> std::array<uint16_t, 475> Font5x5::data {
 };
 
 }
-
-#endif

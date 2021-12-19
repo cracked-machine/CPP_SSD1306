@@ -22,7 +22,6 @@
 
 #include <font.hpp>
 
-#ifdef _Font7x10_
 namespace ssd1306
 {
 
@@ -149,5 +148,3 @@ template<> std::array<uint16_t, 950> Font7x10::data {
 };
 
 }   // namespace ssd1306
-
-#endif // _Font7x10_

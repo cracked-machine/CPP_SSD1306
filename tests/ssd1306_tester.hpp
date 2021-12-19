@@ -46,7 +46,7 @@ public:
     // @param padding 
     // @return char 
     template<std::size_t FONT_SIZE> 
-    char test_write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour colour, bool padding);
+    char test_write_string(std::string &ss, Font<FONT_SIZE> &font, Colour colour, bool padding);
 
     // @brief Helper function to provide protected access to ssd1306::Display::write_char()
     // @tparam FONT_SIZE 
@@ -140,7 +140,7 @@ public:
 
 
 template<std::size_t FONT_SIZE> 
-char ssd1306_tester::test_write_string(std::stringstream &ss, Font<FONT_SIZE> &font, Colour colour, bool padding)
+char ssd1306_tester::test_write_string(std::string &ss, Font<FONT_SIZE> &font, Colour colour, bool padding)
 {
     return write_string(ss, font, colour, padding);
 }

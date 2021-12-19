@@ -24,6 +24,8 @@
 #include <ssd1306.hpp>
 #include <ssd1306_tester.hpp>
 
+
+
 TEST_CASE("Test Fonts", "[ssd1306_fonts]")
 {
     SECTION("3x5Font")
@@ -77,23 +79,23 @@ TEST_CASE("Test Display public API", "[ssd1306_display_public]")
     
     SECTION("Write white on black")
     {
-        std::stringstream text("TEST");
+        std::string text("TEST");
         REQUIRE(oled.write(text, font_under_test, 2, 2, ssd1306::Colour::Black, ssd1306::Colour::White, true, true));
     }
     SECTION("Write black on white")
     {
-        std::stringstream text("TEST");
+        std::string text("TEST");
         REQUIRE(oled.write(text, font_under_test, 2, 2, ssd1306::Colour::White, ssd1306::Colour::Black, true, true));
     }
     SECTION("Write with invalid x position")
     {
-        std::stringstream text("TEST");
+        std::string text("TEST");
         REQUIRE_FALSE(oled.write(text, font_under_test, 255, 2, ssd1306::Colour::Black, ssd1306::Colour::White, true, true));
     }
     SECTION("Write with invalid y position")
     {
 
-        std::stringstream text("TEST");
+        std::string text("TEST");
         REQUIRE_FALSE(oled.write(text, font_under_test, 2, 255, ssd1306::Colour::Black, ssd1306::Colour::White, true, true));
     }
 }
@@ -108,12 +110,6 @@ TEST_CASE("Test Display protected API", "[ssd1306_display_protected]")
         REQUIRE_FALSE(tester.test_write_char(0, font_under_test, ssd1306::Colour::Black, true));
     }
 
-    SECTION("Write uninitialised string")
-    {
-        std::stringstream text;
-        ssd1306::ssd1306_tester tester;
-        REQUIRE_FALSE(tester.test_write_string(text, font_under_test, ssd1306::Colour::White, true));
-    }
 }
 
 // @brief hidden test to find the sum of Font Test. Not to be used in normal test runs 
@@ -128,8 +124,7 @@ TEST_CASE("Check font output", "[dump_fonts][.]")
         // process the test font character in FontTest (font_test.cpp)
 
         // add font character to a string
-        std::stringstream msg;
-        msg << font_under_test.character_map[0];
+        std::string msg{font_under_test.character_map[0]};
 
         // write the string to the buffer
         tester.write(msg, font_under_test, 0, 0, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);
@@ -164,8 +159,7 @@ TEST_CASE("SSD1306 send_data")
 {
     ssd1306::Font5x7 font_under_test;
     ssd1306::Display oled;
-    std::stringstream msg;
-    msg << "Hello";
+    std::string msg("Hello");
     oled.write(msg, font_under_test, 0, 0, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);
     
 

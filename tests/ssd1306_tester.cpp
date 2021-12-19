@@ -45,8 +45,7 @@ bool ssd1306_tester::validate_buffer(std::vector<uint8_t> &validation_buffer)
 
     static ssd1306::FontTest font_under_test;
     // set the font character
-    std::stringstream msg;
-    msg << font_under_test.character_map[0];
+    std::string msg{font_under_test.character_map[0]};
 
     // write the font to the buffer
     write(msg, font_under_test, 0, 0, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);

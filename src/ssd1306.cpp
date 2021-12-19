@@ -25,8 +25,6 @@
 
 #include "ssd1306.hpp"
 #include <iomanip>
-#include <bitset>
-#include <type_traits>
 #include <cstring>
 
 namespace ssd1306
@@ -199,6 +197,9 @@ bool Display::write_data(uint16_t page_pos_gddram)
             LL_GPIO_SetOutputPin(SPI1_DC_GPIO_Port, SPI1_DC_Pin);         
         }
         return true;
+    #elif defined(X86_UNIT_TESTING_ONLY)
+        UNUSED(page_pos_gddram);
+        return true;
     #endif  // defined(USE_SSD1306_HAL_DRIVER)
 } 
 
@@ -257,9 +258,10 @@ void Display::reset()
     m_buffer.fill(0);
 }
 
-
+#if defined(USE_SSD1306_LL_DRIVER)
 bool Display::check_txe_flag_status(uint32_t delay_ms)
 {
+    
     // The TXE flag is set when transmission TXFIFO has enough space to store data to send.
     if (LL_SPI_IsActiveFlag_TXE(SPI1) == 0)
     {
@@ -273,7 +275,9 @@ bool Display::check_txe_flag_status(uint32_t delay_ms)
     }
     return true;
 }
+#endif
 
+#if defined(USE_SSD1306_LL_DRIVER)
 // check SPI bus has finished sending the last byte
 bool Display::check_bsy_flag_status(uint32_t delay_ms)
 {
@@ -289,54 +293,54 @@ bool Display::check_bsy_flag_status(uint32_t delay_ms)
     }    
     return true; 
 }
+#endif
 
+#if defined(X86_UNIT_TESTING_ONLY) || defined(USE_RTT)
 void Display::dump_buffer(bool hex)
 {
 
-    uint16_t byte_count {0};
-    for (auto& byte : m_buffer)
-    {
-        #if defined(USE_RTT)
-            // separate the buffer into pages
-            if ((byte_count) % m_page_width == 0)
-            {
-                SEGGER_RTT_printf(0, "\n\n");   
-                SEGGER_RTT_printf(0, "Page #%u:\n", ((byte_count) / m_page_width));
-            }      
-            // seperate the page into lines of 32 bytes
-            if ((byte_count) % 32 == 0)
-            {
-                SEGGER_RTT_printf(0, "\n");   
-            }                 
-            if (hex)
-            {
-                SEGGER_RTT_printf(0, "0x%02x ", +byte);
-            }
-            else 
-            {
-                SEGGER_RTT_printf(0, "%u ", +byte);
-            }
-      
-        #elif !defined(USE_SSD1306_LL_DRIVER) || !defined(USE_SSD1306_HAL_DRIVER)
-            if ((byte_count) % m_page_width == 0)
-            {
-                std::cout << std::endl << std::endl;
-            } 
-            if (hex)
-            {
-                std::cout << "0x" << std::hex << std::setfill ('0') <<  std::setw(2) << +byte << " ";
-            }
-            else
-            {
-                std::cout << +byte << " ";
-            }
-           
-        #endif   
+        uint16_t byte_count {0};
+        for (auto& byte : m_buffer)
+        {
+            #if defined(USE_RTT)
+                // separate the buffer into pages
+                if ((byte_count) % m_page_width == 0)
+                {
+                    SEGGER_RTT_printf(0, "\n\n");   
+                    SEGGER_RTT_printf(0, "Page #%u:\n", ((byte_count) / m_page_width));
+                }      
+                // seperate the page into lines of 32 bytes
+                if ((byte_count) % 32 == 0)
+                {
+                    SEGGER_RTT_printf(0, "\n");   
+                }                 
+                if (hex)
+                {
+                    SEGGER_RTT_printf(0, "0x%02x ", +byte);
+                }
+                else 
+                {
+                    SEGGER_RTT_printf(0, "%u ", +byte);
+                }
+            #elif defined(X86_UNIT_TESTING_ONLY)
+                if ((byte_count) % m_page_width == 0)
+                {
+                    std::cout << std::endl << std::endl;
+                } 
+                if (hex)
+                {
+                    std::cout << "0x" << std::hex << std::setfill ('0') <<  std::setw(2) << +byte << " ";
+                }
+                else
+                {
+                    std::cout << +byte << " ";
+                }
 
-        byte_count ++;
+            #endif   
 
-    }
-
+            byte_count ++;
+        }
 }
+#endif
 
 } // namespace ssd1306

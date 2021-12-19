@@ -112,7 +112,7 @@ bool Display::update_screen()
         // the next page position within the GDDRAM buffer
         uint16_t page_pos_gddram {static_cast<uint16_t>( m_page_width * page_idx )};
 
-        if (!write_data(page_pos_gddram)) { return false; }
+        if (!send_page_data(page_pos_gddram)) { return false; }
 
         //dump_buffer(true);
     }
@@ -162,7 +162,7 @@ bool Display::send_command(uint8_t cmd_byte)
     
 }
 
-bool Display::write_data(uint16_t page_pos_gddram)
+bool Display::send_page_data(uint16_t page_pos_gddram)
 {
     #if defined(USE_SSD1306_HAL_DRIVER)
 
@@ -183,13 +183,13 @@ bool Display::write_data(uint16_t page_pos_gddram)
             if (!check_txe_flag_status())
             {
                 #if defined(USE_RTT) 
-                    SEGGER_RTT_printf(0, "\nwrite_data(): Tx buffer is full."); 
+                    SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
                 #endif
             }
             if (!check_bsy_flag_status())
             {
                 #if defined(USE_RTT) 
-                    SEGGER_RTT_printf(0, "\nwrite_data(): SPI bus is busy."); 
+                    SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 
                 #endif
             }                          
             LL_SPI_TransmitData8(SPI1, m_buffer[idx]);

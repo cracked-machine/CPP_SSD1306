@@ -130,7 +130,7 @@ private:
 	// @brief send one page of the display buffer over SPI
 	// @param page_pos_gddram The index position of the page within the buffer
 	// @return true if success, false if error
-	bool write_data(uint16_t page_pos_gddram);
+	bool send_page_data(uint16_t page_pos_gddram);
 
 #if defined(USE_SSD1306_LL_DRIVER)
 	// @brief Check and retry (with timeout) the SPIx_SR TXE register.

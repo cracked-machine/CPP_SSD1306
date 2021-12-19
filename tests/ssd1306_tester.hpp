@@ -38,6 +38,8 @@ class ssd1306_tester : public ssd1306::Display
 public:
     ssd1306_tester();
 
+    bool get_buffer_page(uint8_t page_idx, std::vector<uint16_t> &page);
+
     // @brief Helper function to provide protected access to ssd1306::Display::write_string()
     // @tparam FONT_SIZE 
     // @param ss 
@@ -150,6 +152,8 @@ char ssd1306_tester::test_write_char(char ch, Font<FONT_SIZE> &font, Colour colo
 {
     return write_char(ch, font, colour, padding);
 }
+
+
 
 } // namespace ssd1306
 

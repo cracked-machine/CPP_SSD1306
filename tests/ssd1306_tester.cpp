@@ -69,6 +69,19 @@ bool ssd1306_tester::validate_buffer(std::vector<uint8_t> &validation_buffer)
     return true;
 }
 
+bool ssd1306_tester::get_buffer_page(uint8_t page_number, std::vector<uint16_t> &page)
+{
+ 
+    page.resize(0);
+    const uint16_t page_start_idx = page_number * m_page_width;
+    for (uint16_t idx = page_start_idx; idx < page_start_idx + m_page_width; idx++)
+    {
+        page.push_back(m_buffer[idx]);
+    }
+    return true;
+  
+}
+
 bool ssd1306_tester::dump_buffer_as_hex()
 {
 #ifdef ENABLE_SSD1306_TEST_STDOUT    

@@ -147,13 +147,13 @@ bool Display::send_command(uint8_t cmd_byte)
         return true;
         //HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_SET); // un-select Display
     #elif defined(USE_SSD1306_LL_DRIVER)
-            if (!check_txe_flag_status())
+            if (!check_txe_flag_status(SPI1))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
                 #endif
             }
-            if (!check_bsy_flag_status())
+            if (!check_bsy_flag_status(SPI1))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
@@ -189,13 +189,13 @@ bool Display::send_page_data(uint16_t page_pos_gddram)
         // transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
         for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
         {
-            if (!check_txe_flag_status())
+            if (!check_txe_flag_status(SPI1))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
                 #endif
             }
-            if (!check_bsy_flag_status())
+            if (!check_bsy_flag_status(SPI1))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 
@@ -268,15 +268,21 @@ void Display::reset()
 }
 
 #if defined(USE_SSD1306_LL_DRIVER)
-bool Display::check_txe_flag_status(uint32_t delay_ms)
+bool Display::check_txe_flag_status(const SPI_TypeDef *spi_handle, uint32_t delay_ms)
 {
-    
+    if (spi_handle == nullptr)
+    {
+        return false;
+    }
+
     // The TXE flag is set when transmission TXFIFO has enough space to store data to send.
-    if (LL_SPI_IsActiveFlag_TXE(SPI1) == 0)
+    //if (LL_SPI_IsActiveFlag_TXE(h_spi) == 0)
+    if ((spi_handle->SR & SPI_SR_TXE) != (SPI_SR_TXE))
     {
         // give TX FIFO a chance to clear before checking again
         LL_mDelay(delay_ms);
-        if (!LL_SPI_IsActiveFlag_TXE(SPI1)  == 0) 
+        //if (LL_SPI_IsActiveFlag_TXE(h_spi) == 0)
+        if ((spi_handle->SR & SPI_SR_TXE) != (SPI_SR_TXE))
         { 
             return false;
         }
@@ -288,14 +294,20 @@ bool Display::check_txe_flag_status(uint32_t delay_ms)
 
 #if defined(USE_SSD1306_LL_DRIVER)
 // check SPI bus has finished sending the last byte
-bool Display::check_bsy_flag_status(uint32_t delay_ms)
+bool Display::check_bsy_flag_status(const SPI_TypeDef *spi_handle, uint32_t delay_ms)
 {
+    if (spi_handle == nullptr)
+    {
+        return false;
+    }
     // When BSY is set, it indicates that a data transfer is in progress on the SPI
-    if (LL_SPI_IsActiveFlag_BSY(SPI1)) 
+    // if (LL_SPI_IsActiveFlag_BSY(SPI1)) 
+    if ((spi_handle->SR & SPI_SR_BSY) == (SPI_SR_BSY))
     {
         // give SPI bus a chance to finish sending data before checking again
         LL_mDelay(delay_ms);
-        if (LL_SPI_IsActiveFlag_BSY(SPI1)) 
+        //if (LL_SPI_IsActiveFlag_BSY(SPI1)) 
+        if ((spi_handle->SR & SPI_SR_BSY) == (SPI_SR_BSY))
         { 
             return false;
         }

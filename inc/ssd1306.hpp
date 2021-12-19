@@ -69,6 +69,10 @@ public:
 	// @brief write setup commands to the IC
 	bool init();
 
+	// @brief Write single colour to entire sw buffer
+	// @param colour 
+	void fill(Colour colour);
+
 	// @brief Convenience function to write msg to the display.
 	// @tparam FONT_SIZE The size of the font data, Uses template argument deduction.
 	// @param msg The message to display
@@ -106,10 +110,6 @@ private:
 	// @param colour white/black
 	bool draw_pixel(uint8_t x, uint8_t y, Colour colour);
 
-	// @brief Write single colour to entire sw buffer
-	// @param colour 
-	void fill(Colour colour);
-
 	// @brief Write the sw buffer to the IC GDDRAM (Page Addressing Mode only)
 	bool update_screen();
 
@@ -136,12 +136,12 @@ private:
 	// @brief Check and retry (with timeout) the SPIx_SR TXE register.
 	// @param delay_ms The timeout
 	// @return true if TX FIFO is empty, false if TX FIFO is full
-	bool check_txe_flag_status(uint32_t delay_ms = 1);
+	bool check_txe_flag_status(const SPI_TypeDef *h_spi, uint32_t delay_ms = 1);
 
 	// @brief Check and retry (with timeout) the SPIx_SR BSY register.
 	// @param delay_ms The timeout
 	// @return true if SPI bus is busy, false if SPI bus is not busy.
-	bool check_bsy_flag_status(uint32_t delay_ms = 1);
+	bool check_bsy_flag_status(const SPI_TypeDef *h_spi, uint32_t delay_ms = 1);
 #endif
 
 	// @brief X coordinate for writing to the display
@@ -150,8 +150,7 @@ private:
 	// @brief Y coordinate for writing to the display
     uint16_t m_currenty {0};
 
-	// @brief The display width in bytes. Also the size of each GDDRAM page
-    static const uint16_t m_page_width {128};
+
 
 	// @brief The display height, in bytes. Also the number of pages (8) multiplied by the bits per page column (8)
     static const uint16_t m_height {64};
@@ -330,6 +329,9 @@ private:
 
 
 protected:
+
+	// @brief The display width in bytes. Also the size of each GDDRAM page
+    static const uint16_t m_page_width {128};
 
 	// @brief byte buffer for ssd1306. Access to derived classes like ssd1306_tester is permitted.
     std::array<uint8_t, (m_page_width*m_height)/8> m_buffer;

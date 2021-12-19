@@ -160,3 +160,14 @@ TEST_CASE("SSD1306 Buffer Validation", "[ssd1306_buffer_check]")
     }
 }
 
+TEST_CASE("SSD1306 send_data")
+{
+    ssd1306::Font5x7 font_under_test;
+    ssd1306::Display oled;
+    std::stringstream msg;
+    msg << "Hello";
+    oled.write(msg, font_under_test, 0, 0, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);
+    
+
+}
+

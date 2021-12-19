@@ -53,7 +53,7 @@
 namespace ssd1306
 {
 
-// @brief 
+// @brief colour range of the OLED(!)
 enum class Colour: uint16_t
 {
     Black = 0x00, 
@@ -66,22 +66,19 @@ class Display
 public:
 	Display() = default;
 
-	virtual ~Display() = default;
-
-	// @brief 
+	// @brief write setup commands to the IC
 	bool init();
 
-
-	// @brief 
-	// @tparam FONT_SIZE 
-	// @param msg 
-	// @param font 
-	// @param x 
-	// @param y 
-	// @param bg 
-	// @param fg 
-	// @param padding 
-	// @param update 
+	// @brief Convenience function to write msg to the display.
+	// @tparam FONT_SIZE The size of the font data, Uses template argument deduction.
+	// @param msg The message to display
+	// @param font The font size object: Font5x5, Font5x7, Font7x10, Font11x18, Font16x26
+	// @param x pos
+	// @param y pos
+	// @param bg The background colour
+	// @param fg The foreground colour
+	// @param padding add an extra pixel to the vertical edge of the character
+	// @param update write the sw buffer to the IC
 	// @return char 
 	template<std::size_t FONT_SIZE> 
 	char write(std::stringstream &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
@@ -95,50 +92,59 @@ public:
 	// @return constexpr uint16_t 
 	static constexpr uint16_t get_display_height() { return m_height; }
 
+	// @brief Debug function to display entire SW bufefr to console (uses RTT on arm, uses std::cout on x86) 
+	// @param hex display in hex or decimal values
+	void dump_buffer(bool hex);
+
 private:
 	
-	// @brief 
-	// @param x 
-	// @param y 
-	// @param colour 
+	// @brief Write a pixel to the sw buffer at the corresponding display coordinates 
+	// @param x pos
+	// @param y pos
+	// @param colour white/black
 	bool draw_pixel(uint8_t x, uint8_t y, Colour colour);
 
-	// @brief 
+	// @brief Write single colour to entire sw buffer
 	// @param colour 
 	void fill(Colour colour);
 
-	// @brief 
+	// @brief Write the sw buffer to the IC GDDRAM (Page Addressing Mode only)
 	bool update_screen();
 
-	// @brief 
+	// @brief Reset the Driver IC and SW buffer.
 	void reset();
 	
-	// @brief Set the cursor object
+	// @brief Set the coordinates to draw to the display
 	// @param x 
 	// @param y 
 	bool set_cursor(uint8_t x, uint8_t y);
 
 
-	// @brief 
-	// @param cmd_byte 
-	bool write_command(uint8_t cmd_byte);
+	// @brief Send one command over SPI 
+	// @param cmd_byte The byte to send
+	// @return true if success, false if error
+	bool send_command(uint8_t cmd_byte);
 	
-	// @brief 
-	// @param data_buffer 
-	// @param data_buffer_size 
-	bool write_data(uint16_t page_start_idx);
+	// @brief send one page of the display buffer over SPI
+	// @param page_pos_gddram The index position of the page within the buffer
+	// @return true if success, false if error
+	bool write_data(uint16_t page_pos_gddram);
 
-	// @brief 
+	// @brief Check and retry (with timeout) the SPIx_SR TXE register.
+	// @param delay_ms The timeout
+	// @return true if TX FIFO is empty, false if TX FIFO is full
+	bool check_txe_flag_status(uint32_t delay_ms = 1);
+
+	// @brief Check and retry (with timeout) the SPIx_SR BSY register.
+	// @param delay_ms The timeout
+	// @return true if SPI bus is busy, false if SPI bus is not busy.
+	bool check_bsy_flag_status(uint32_t delay_ms = 1);
+
+	// @brief X coordinate for writing to the display
     uint16_t m_currentx {0};
 
-	// @brief 
+	// @brief Y coordinate for writing to the display
     uint16_t m_currenty {0};
-
-	// @brief 
-    uint8_t m_inverted {0};
-
-	// @brief 
-    uint8_t m_initialized {0};
 
 	// @brief The display width in bytes. Also the size of each GDDRAM page
     static const uint16_t m_page_width {128};
@@ -189,12 +195,7 @@ protected:
 	// @return char 
 	template<std::size_t FONT_SIZE> 
 	char write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
-	
 
-	// @brief Get the buffer object. Used for testing only.
-	// @notes use
-	// @param buffer 
-	//void get_buffer(std::array<uint8_t, (m_page_width*m_height)/8> &buffer) { buffer = m_buffer; }
 
 };
 
@@ -266,13 +267,15 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool pad
 	{
         if (!font.get_pixel( (ch - 32) * font.height() + font_height_idx, font_data_word )) { return false; }
 
-#ifdef ENABLE_SSD1306_TEST_STDOUT
-		// separator for the font
-        std::cout << std::endl;
-#endif
+		#ifdef ENABLE_SSD1306_TEST_STDOUT
+				// separator for the font
+				std::cout << std::endl;
+		#endif
 
+		// get each bit/pixel in the font_data_word and write it to the display output buffer
         for(size_t font_width_idx = 0; font_width_idx < font.width(); font_width_idx++) 
 		{
+			// shift left and check if MSB is set: write as foreground pixel
             if((font_data_word << font_width_idx) & 0x8000)
             {
             	switch (colour)
@@ -292,6 +295,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool pad
 						break;
 				}			
             }
+			// MSB is not set: write as background pixel
             else
             {
             	switch (colour)

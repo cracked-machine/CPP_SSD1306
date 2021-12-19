@@ -28,11 +28,11 @@
 //#include <variant>
 //#include <fontdata.hpp>
 
-// #define _Font5x5_
+#define _Font5x5_
 #define _Font5x7_
-// #define _Font7x10_
-// #define _Font11x18_
-// #define _Font16x26_
+#define _Font7x10_
+#define _Font11x18_
+#define _Font16x26_
 
 namespace ssd1306
 {

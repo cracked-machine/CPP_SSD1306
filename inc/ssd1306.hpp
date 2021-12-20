@@ -156,7 +156,6 @@ private:
     static const uint16_t m_height {64};
 	
 #ifdef USE_SSD1306_HAL_DRIVER
-
 	// @brief 
 	SPI_HandleTypeDef m_spi_port {hspi1};
 	// @brief 
@@ -171,7 +170,14 @@ private:
 	GPIO_TypeDef* m_reset_port {SPI1_RESET_GPIO_Port};
 	// @brief 
 	uint16_t m_reset_pin {SPI1_RESET_Pin};
+#elif USE_SSD1306_LL_DRIVER
+	SPI_TypeDef	*m_spi_port 	{SPI1};
 
+	GPIO_TypeDef *m_reset_port 	{SPI1_RESET_GPIO_Port};
+	uint32_t m_reset_pin		{SPI1_RESET_Pin};
+	
+	GPIO_TypeDef *m_dc_port 	{SPI1_DC_GPIO_Port};
+	uint32_t m_dc_pin			{SPI1_DC_Pin};
 #endif
 
 	// @brief SSD1306 Fundamental Commands - See Section 9 of datasheet for setting bytes

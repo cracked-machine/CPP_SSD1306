@@ -33,7 +33,7 @@ namespace ssd1306
 bool Display::init()
 {
     #if defined(USE_SSD1306_LL_DRIVER)
-        LL_SPI_Enable(SPI1);
+        LL_SPI_Enable(m_spi_port);
     #endif
 
 	reset();
@@ -147,21 +147,21 @@ bool Display::send_command(uint8_t cmd_byte)
         return true;
         //HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_SET); // un-select Display
     #elif defined(USE_SSD1306_LL_DRIVER)
-            if (!check_txe_flag_status(SPI1))
+            if (!check_txe_flag_status(m_spi_port))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
                 #endif
             }
-            if (!check_bsy_flag_status(SPI1))
+            if (!check_bsy_flag_status(m_spi_port))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
                 #endif
             }  
         // set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
-        LL_GPIO_ResetOutputPin(SPI1_DC_GPIO_Port, SPI1_DC_Pin);      
-        LL_SPI_TransmitData8(SPI1, cmd_byte);    
+        LL_GPIO_ResetOutputPin(m_dc_port, m_dc_pin);      
+        LL_SPI_TransmitData8(m_spi_port, cmd_byte);    
         
         return true;
     #else
@@ -189,21 +189,21 @@ bool Display::send_page_data(uint16_t page_pos_gddram)
         // transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
         for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
         {
-            if (!check_txe_flag_status(SPI1))
+            if (!check_txe_flag_status(m_spi_port))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
                 #endif
             }
-            if (!check_bsy_flag_status(SPI1))
+            if (!check_bsy_flag_status(m_spi_port))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 
                 #endif
             }                          
-            LL_SPI_TransmitData8(SPI1, m_buffer[idx]);
+            LL_SPI_TransmitData8(m_spi_port, m_buffer[idx]);
             // set data mode/high signal after we put data into TXFIFO to avoid premature latching
-            LL_GPIO_SetOutputPin(SPI1_DC_GPIO_Port, SPI1_DC_Pin);         
+            LL_GPIO_SetOutputPin(m_dc_port, m_dc_pin);         
         }
         return true;
     #elif defined(X86_UNIT_TESTING_ONLY)
@@ -257,9 +257,9 @@ void Display::reset()
         HAL_GPIO_WritePin(m_reset_port, m_reset_pin, GPIO_PIN_SET);
         HAL_Delay(10);
     #elif defined(USE_SSD1306_LL_DRIVER)
-        LL_GPIO_ResetOutputPin(SPI1_RESET_GPIO_Port, SPI1_RESET_Pin);
+        LL_GPIO_ResetOutputPin(m_reset_port, m_reset_pin);
         LL_mDelay(10);
-        LL_GPIO_SetOutputPin(SPI1_RESET_GPIO_Port, SPI1_RESET_Pin);
+        LL_GPIO_SetOutputPin(m_reset_port, m_reset_pin);
         LL_mDelay(10);
     #endif
 
@@ -301,12 +301,12 @@ bool Display::check_bsy_flag_status(const SPI_TypeDef *spi_handle, uint32_t dela
         return false;
     }
     // When BSY is set, it indicates that a data transfer is in progress on the SPI
-    // if (LL_SPI_IsActiveFlag_BSY(SPI1)) 
+    // if (LL_SPI_IsActiveFlag_BSY(m_spi_port)) 
     if ((spi_handle->SR & SPI_SR_BSY) == (SPI_SR_BSY))
     {
         // give SPI bus a chance to finish sending data before checking again
         LL_mDelay(delay_ms);
-        //if (LL_SPI_IsActiveFlag_BSY(SPI1)) 
+        //if (LL_SPI_IsActiveFlag_BSY(m_spi_port)) 
         if ((spi_handle->SR & SPI_SR_BSY) == (SPI_SR_BSY))
         { 
             return false;

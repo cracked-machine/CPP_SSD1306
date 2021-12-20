@@ -156,27 +156,26 @@ private:
     static const uint16_t m_height {64};
 	
 #ifdef USE_SSD1306_HAL_DRIVER
-	// @brief 
+	// @brief The HAL SPI object
 	SPI_HandleTypeDef m_spi_port {hspi1};
-	// @brief 
-	uint16_t m_cs_port {0};
-	// @brief 
-	uint16_t m_cs_pin {0};
-	// @brief 
+	// @brief The data/command GPIO port object
 	GPIO_TypeDef* m_dc_port {SPI1_DC_GPIO_Port};
-	// @brief 
+	// @brief The data/command GPIO pin
 	uint16_t m_dc_pin {SPI1_DC_Pin};
-	// @brief 
+	// @brief The reset GPIO port object
 	GPIO_TypeDef* m_reset_port {SPI1_RESET_GPIO_Port};
-	// @brief 
+	// @brief The reset GPIO pin
 	uint16_t m_reset_pin {SPI1_RESET_Pin};
 #elif USE_SSD1306_LL_DRIVER
+	// @brief The LL SPI object
 	SPI_TypeDef	*m_spi_port 	{SPI1};
-
+	// @brief The reset GPIO port object
 	GPIO_TypeDef *m_reset_port 	{SPI1_RESET_GPIO_Port};
+	// @brief The reset GPIO pin
 	uint32_t m_reset_pin		{SPI1_RESET_Pin};
-	
+	// @brief The data/command GPIO port object	
 	GPIO_TypeDef *m_dc_port 	{SPI1_DC_GPIO_Port};
+	// @brief The data/command GPIO pin	
 	uint32_t m_dc_pin			{SPI1_DC_Pin};
 #endif
 

@@ -30,8 +30,6 @@
 #include <array>
 #include <string>
 
-
-
 #if defined(USE_SSD1306_HAL_DRIVER) || defined(USE_SSD1306_LL_DRIVER)
 	// Required when using GCC 10.3.1 arm-none-eabi 
 	// warning: compound assignment with 'volatile'-qualified left operand is deprecated [-Wvolatile]
@@ -44,11 +42,16 @@
 	// only used when unit testing on x86
 	#include <iostream>
 #endif
-// this macro is defined in HAL but we still need it when using LL or x86
-#if !defined(USE_SSD1306_HAL_DRIVER)
+
+// this macro is defined in HAL but we still want it when using LL or x86
+#if defined(X86_UNIT_TESTING_ONLY) || defined(USE_SSD1306_LL_DRIVER)
     #define UNUSED(X) (void)X 
 #endif
 
+
+#if defined(USE_SSD1306_LL_DRIVER)
+	#include "ll_spi_utils.hpp"
+#endif
 
 namespace ssd1306
 {
@@ -103,7 +106,7 @@ public:
 #endif
 
 private:
-	
+
 	// @brief Write a pixel to the sw buffer at the corresponding display coordinates 
 	// @param x pos
 	// @param y pos
@@ -132,25 +135,11 @@ private:
 	// @return true if success, false if error
 	bool send_page_data(uint16_t page_pos_gddram);
 
-#if defined(USE_SSD1306_LL_DRIVER)
-	// @brief Check and retry (with timeout) the SPIx_SR TXE register.
-	// @param delay_ms The timeout
-	// @return true if TX FIFO is empty, false if TX FIFO is full
-	bool check_txe_flag_status(const SPI_TypeDef *h_spi, uint32_t delay_ms = 1);
-
-	// @brief Check and retry (with timeout) the SPIx_SR BSY register.
-	// @param delay_ms The timeout
-	// @return true if SPI bus is busy, false if SPI bus is not busy.
-	bool check_bsy_flag_status(const SPI_TypeDef *h_spi, uint32_t delay_ms = 1);
-#endif
-
 	// @brief X coordinate for writing to the display
     uint16_t m_currentx {0};
 
 	// @brief Y coordinate for writing to the display
     uint16_t m_currenty {0};
-
-
 
 	// @brief The display height, in bytes. Also the number of pages (8) multiplied by the bits per page column (8)
     static const uint16_t m_height {64};

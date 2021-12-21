@@ -27,6 +27,10 @@
 #include <iomanip>
 #include <cstring>
 
+#if defined(USE_SSD1306_LL_DRIVER)
+	#include "ll_spi_utils.hpp"
+#endif
+
 namespace ssd1306
 {
 

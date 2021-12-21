@@ -34,6 +34,10 @@ bool Display::init()
 {
     #if defined(USE_SSD1306_LL_DRIVER)
         LL_SPI_Enable(m_spi_port);
+        if (!LL_SPI_IsEnabled(m_spi_port))
+        {
+            return false;
+        }
     #endif
 
 	reset();
@@ -87,7 +91,10 @@ bool Display::init()
     fill(Colour::White);
 
     // Flush buffer to screen
-    update_screen();
+    if (!update_screen())
+    {
+        return false;
+    }
 
     // Set default values for screen object
     m_currentx = 0;

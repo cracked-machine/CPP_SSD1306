@@ -23,16 +23,20 @@
 // @note See datasheet
 // https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf
 
-#ifndef Display_HPP_
-#define Display_HPP_
+#ifndef __SSD1306_HPP_
+#define __SSD1306_HPP_
 
 #include <font.hpp>
 #include <array>
 #include <string>
 
+#if defined(USE_SSD1306_LL_DRIVER)
+    #include <bitset_utils.hpp>
+    
+#endif
+
 #if defined(USE_SSD1306_HAL_DRIVER) || defined(USE_SSD1306_LL_DRIVER)
-	// Required when using GCC 10.3.1 arm-none-eabi 
-	// warning: compound assignment with 'volatile'-qualified left operand is deprecated [-Wvolatile]
+
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wvolatile"
 		#include "main.h"
@@ -481,4 +485,4 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool pad
 
 } // namespace ssd1306
 
-#endif /* Display_HPP_ */
+#endif /* __SSD1306_HPP_ */

@@ -1,4 +1,4 @@
-add_subdirectory(embedded_utils)
+
 
 target_sources(${BUILD_NAME} PRIVATE
     src/font5x5.cpp

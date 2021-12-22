@@ -158,18 +158,19 @@ bool Display::send_command(uint8_t cmd_byte)
         return true;
         //HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_SET); // un-select Display
     #elif defined(USE_SSD1306_LL_DRIVER)
-            if (!embedded_utils::LowLevelSPIUtils::check_txe_flag_status(m_spi_port))
-            {
-                #if defined(USE_RTT) 
-                    SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
-                #endif
-            }
-            if (!embedded_utils::LowLevelSPIUtils::check_bsy_flag_status(m_spi_port))
-            {
-                #if defined(USE_RTT) 
-                    SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
-                #endif
-            }  
+        embedded_utils::LowLevelSPIUtils spi_utils;
+        if (!spi_utils.check_txe_flag_status(m_spi_port))
+        {
+            #if defined(USE_RTT) 
+                SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
+            #endif
+        }
+        if (!spi_utils.check_bsy_flag_status(m_spi_port))
+        {
+            #if defined(USE_RTT) 
+                SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
+            #endif
+        }  
         // set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
         LL_GPIO_ResetOutputPin(m_dc_port, m_dc_pin);      
         LL_SPI_TransmitData8(m_spi_port, cmd_byte);    
@@ -196,17 +197,17 @@ bool Display::send_page_data(uint16_t page_pos_gddram)
         return true;
 
     #elif defined(USE_SSD1306_LL_DRIVER)
-
+        embedded_utils::LowLevelSPIUtils spi_utils;
         // transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
         for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
         {
-            if (!embedded_utils::LowLevelSPIUtils::check_txe_flag_status(m_spi_port))
+            if (!spi_utils.check_txe_flag_status(m_spi_port))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
                 #endif
             }
-            if (!embedded_utils::LowLevelSPIUtils::check_bsy_flag_status(m_spi_port))
+            if (!spi_utils.check_bsy_flag_status(m_spi_port))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 

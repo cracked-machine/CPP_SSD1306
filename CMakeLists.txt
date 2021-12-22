@@ -1,3 +1,5 @@
+add_subdirectory(embedded_utils)
+
 target_sources(${BUILD_NAME} PRIVATE
     src/font5x5.cpp
     src/font5x7.cpp
@@ -9,5 +11,4 @@ target_sources(${BUILD_NAME} PRIVATE
 
 target_include_directories(${BUILD_NAME} PRIVATE 
     inc
-    embedded_utils/inc
 )

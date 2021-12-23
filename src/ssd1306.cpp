@@ -156,13 +156,13 @@ bool Display::send_command(uint8_t cmd_byte)
         return true;
         //HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_SET); // un-select Display
     #elif defined(USE_SSD1306_LL_DRIVER)
-        if (!embedded_utils::LowLevelSPIUtils::check_txe_flag_status(m_spi_port))
+        if (!embed_utils::spi::ll_wait_for_txe_flag(m_spi_port))
         {
             #if defined(USE_RTT) 
                 SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
             #endif
         }
-        if (!embedded_utils::LowLevelSPIUtils::check_bsy_flag_status(m_spi_port))
+        if (!embed_utils::spi::ll_wait_for_bsy_flag(m_spi_port))
         {
             #if defined(USE_RTT) 
                 SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
@@ -197,13 +197,13 @@ bool Display::send_page_data(uint16_t page_pos_gddram)
         // transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
         for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
         {
-            if (!embedded_utils::LowLevelSPIUtils::check_txe_flag_status(m_spi_port))
+            if (!embed_utils::spi::ll_wait_for_txe_flag(m_spi_port))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
                 #endif
             }
-            if (!embedded_utils::LowLevelSPIUtils::check_bsy_flag_status(m_spi_port))
+            if (!embed_utils::spi::ll_wait_for_bsy_flag(m_spi_port))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 

@@ -140,9 +140,9 @@ bool Display::update_screen()
 
 bool Display::send_command(uint8_t cmd_byte)
 {
-    #if defined(USE_RTT)
-        SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
-    #endif  
+    // #if defined(USE_RTT)
+    //     SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
+    // #endif  
 
     #if defined(USE_SSD1306_HAL_DRIVER)
         HAL_StatusTypeDef res = HAL_OK;

@@ -47,10 +47,7 @@
 	#include <iostream>
 #endif
 
-// this macro is defined in HAL but we still want it when using LL or x86
-#if defined(X86_UNIT_TESTING_ONLY) || defined(USE_SSD1306_LL_DRIVER)
-    #define UNUSED(X) (void)X 
-#endif
+
 
 
 namespace ssd1306
@@ -155,7 +152,7 @@ private:
 	GPIO_TypeDef* m_reset_port {SPI1_RESET_GPIO_Port};
 	// @brief The reset GPIO pin
 	uint16_t m_reset_pin {SPI1_RESET_Pin};
-#elif USE_SSD1306_LL_DRIVER
+#elif defined(USE_SSD1306_LL_DRIVER)
 	// @brief The LL SPI object
 	SPI_TypeDef	*m_spi_port 	{SPI1};
 	// @brief The reset GPIO port object
@@ -166,6 +163,8 @@ private:
 	GPIO_TypeDef *m_dc_port 	{SPI1_DC_GPIO_Port};
 	// @brief The data/command GPIO pin	
 	uint32_t m_dc_pin			{SPI1_DC_Pin};
+#else
+	// x86; define nothing
 #endif
 
 	// @brief SSD1306 Fundamental Commands - See Section 9 of datasheet for setting bytes

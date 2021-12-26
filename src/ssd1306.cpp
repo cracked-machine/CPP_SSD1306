@@ -27,8 +27,9 @@
 #include <iomanip>
 #include <cstring>
 
-#include <ll_spi_utils.hpp>
-
+#ifdef USE_FULL_LL_DRIVER
+    #include <ll_spi_utils.hpp>
+#endif
 namespace ssd1306
 {
 
@@ -138,7 +139,7 @@ bool Display::update_screen()
     return true;
 }
 
-bool Display::send_command(uint8_t cmd_byte)
+bool Display::send_command([[maybe_unused]] uint8_t cmd_byte)
 {
     // #if defined(USE_RTT)
     //     SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
@@ -173,14 +174,13 @@ bool Display::send_command(uint8_t cmd_byte)
         LL_SPI_TransmitData8(m_spi_port, cmd_byte);    
         
         return true;
-    #else
-        UNUSED (cmd_byte);
+    #else   
         return true;
     #endif
     
 }
 
-bool Display::send_page_data(uint16_t page_pos_gddram)
+bool Display::send_page_data([[maybe_unused]] uint16_t page_pos_gddram)
 {
     #if defined(USE_SSD1306_HAL_DRIVER)
 
@@ -215,7 +215,6 @@ bool Display::send_page_data(uint16_t page_pos_gddram)
         }
         return true;
     #elif defined(X86_UNIT_TESTING_ONLY)
-        UNUSED(page_pos_gddram);
         return true;
     #endif  // defined(USE_SSD1306_HAL_DRIVER)
 } 

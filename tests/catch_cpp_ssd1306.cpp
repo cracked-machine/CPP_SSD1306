@@ -41,7 +41,7 @@ TEST_CASE("Test Fonts", "[ssd1306_fonts]")
         static ssd1306::Font5x7 font_under_test;
         REQUIRE(font_under_test.width() == 5);
         REQUIRE(font_under_test.height() == 7);
-        REQUIRE(font_under_test.size() == 680);   
+        REQUIRE(font_under_test.size() == 665);   
     }    
 
     SECTION("7x10Font")

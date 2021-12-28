@@ -24,12 +24,14 @@
 // https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf
 
 #include "ssd1306.hpp"
+
 #include <iomanip>
 #include <cstring>
 
 #ifdef USE_FULL_LL_DRIVER
     #include <ll_spi_utils.hpp>
 #endif
+
 namespace ssd1306
 {
 
@@ -139,7 +141,7 @@ bool Display::update_screen()
     return true;
 }
 
-bool Display::send_command([[maybe_unused]] uint8_t cmd_byte)
+bool Display::send_command(uint8_t cmd_byte [[maybe_unused]])
 {
     // #if defined(USE_RTT)
     //     SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
@@ -180,7 +182,7 @@ bool Display::send_command([[maybe_unused]] uint8_t cmd_byte)
     
 }
 
-bool Display::send_page_data([[maybe_unused]] uint16_t page_pos_gddram)
+bool Display::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
 {
     #if defined(USE_SSD1306_HAL_DRIVER)
 

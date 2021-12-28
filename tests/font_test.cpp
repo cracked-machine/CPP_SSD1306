@@ -50,10 +50,10 @@ namespace ssd1306
 
 
 // @brief only 3 MSB of each halfword are used. 1 bit per col.
-template<> uint8_t ssd1306::FontTest::m_width{16};
+template<> const uint8_t ssd1306::FontTest::m_width{16};
 
 // @brief 5 rows of two bytes (half-words)   
-template<> uint8_t ssd1306::FontTest::m_height{26};
+template<> const uint8_t ssd1306::FontTest::m_height{26};
 
 // @brief The font data, top to bottom.
 template<> std::array<uint16_t, 26> ssd1306::FontTest::data {

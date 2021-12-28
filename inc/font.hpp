@@ -29,6 +29,8 @@
 namespace ssd1306
 {
 
+const size_t char_map_size {95};
+
 template<std::size_t FONT_SIZE>
 class Font
 {
@@ -66,7 +68,7 @@ public:
 	// @return size_t the array size
 	size_t size() { return data.size(); }
 
-	std::array<char, 95> character_map {
+	std::array<char, char_map_size> character_map {
 		' ', '!', '"', '#', '$', '%', '&', '\'','(', ')',
 		'*', '+', ',', '-', '.', '/', '0', '1', '2', '3',
 		'4', '5', '6', '7', '8', '9', ':', ';', '<', '=',
@@ -82,10 +84,10 @@ public:
 private:
 
 	// @brief The width of the font in pixels
-	static uint8_t m_width; 
+	static const uint8_t m_width; 
 
 	// @brief The height of the font in pixels
-	static uint8_t m_height;
+	static const uint8_t m_height;
 
 	// @brief the font data
 	static std::array<uint16_t, FONT_SIZE> data;
@@ -93,17 +95,11 @@ private:
 };
 
 // specializations
-
-typedef Font<475> Font5x5;
-typedef Font<680> Font5x7;
-typedef Font<950> Font7x10;
-typedef Font<1710> Font11x18;
-typedef Font<2470> Font16x26;
-
-
-
-
-
+typedef Font<5 * char_map_size> Font5x5;
+typedef Font<7 * char_map_size> Font5x7;
+typedef Font<10 * char_map_size> Font7x10;
+typedef Font<18 * char_map_size> Font11x18;
+typedef Font<26 * char_map_size> Font16x26;
 
 } // namespace ssd1306
 

@@ -32,11 +32,9 @@
 
 #if defined(USE_SSD1306_LL_DRIVER)
     #include <bitset_utils.hpp>
-    
 #endif
 
 #if defined(USE_SSD1306_HAL_DRIVER) || defined(USE_SSD1306_LL_DRIVER)
-
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wvolatile"
 		#include "main.h"

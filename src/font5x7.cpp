@@ -41,13 +41,13 @@ namespace ssd1306
 // o o o o o x x x x x x x x x x x	0xFF00  ROW #6
 
 // @brief only 5 MSB of each halfword are used. 1 bit per col.
-template<> uint8_t Font5x7::m_width{5};
+template<> uint8_t const Font5x7::m_width{5};
 
 // @brief 7 rows of two bytes (half-words)  
-template<> uint8_t Font5x7::m_height{7};
+template<> uint8_t const Font5x7::m_height{7};
 
 // @brief The font data, top to bottom.
-template<> std::array<uint16_t, 680> Font5x7::data {
+template<> std::array<uint16_t, Font5x7::m_height * char_map_size> Font5x7::data {
 //  ROW #0  ROW #1  ROW #2  ROW #3  ROW #4  ROW #5  ROW #6
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // sp
     0x1000, 0x1000, 0x1000, 0x1000, 0x0000, 0x1000, 0x0000,  // !

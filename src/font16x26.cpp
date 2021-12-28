@@ -59,13 +59,13 @@ namespace ssd1306
 // - - o o o o o o o o o o o o o o 	0x3FFF  ROW #25
 
 // @brief only 16 MSB of each halfword are used. 1 bit per col.
-template<> uint8_t Font16x26::m_width{16};
+template<> uint8_t const Font16x26::m_width{16};
 
 // @brief 26 rows of two bytes (half-words)   
-template<> uint8_t Font16x26::m_height{26};
+template<> const uint8_t Font16x26::m_height{26};
 
 // @brief The font data, top to bottom.
-template<> std::array<uint16_t, 2470> Font16x26::data {
+template<> std::array<uint16_t, Font16x26::m_height * char_map_size> Font16x26::data {
 //  ROW #0  ROW #1  ROW #2  ROW #3  ROW #4  ROW #5  ROW #6  ROW #7  ROW #8  ROW #9  ROW#10  ROW#11  ROW#12  ROW#13  ROW#14  ROW#15  ROW#16  ROW#17  ROW#18  ROW#19  ROW#20  ROW#21  ROW#22  ROW#23  ROW#24  ROW#25  
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // Ascii = [ ]
     0x03E0, 0x03E0, 0x03E0, 0x03E0, 0x03E0, 0x03E0, 0x03E0, 0x03E0, 0x03C0, 0x03C0, 0x01C0, 0x01C0, 0x01C0, 0x01C0, 0x01C0, 0x0000, 0x0000, 0x0000, 0x03E0, 0x03E0, 0x03E0, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // Ascii = [!]

@@ -93,7 +93,7 @@ bool Display::init()
     if (!send_command( static_cast<uint8_t>(fcmd::display_mode_normal) )) { return false; } 
 
     // Clear screen
-    fill(Colour::White);
+    fill(Colour::Black);
 
     // Flush buffer to screen
     if (!update_screen())

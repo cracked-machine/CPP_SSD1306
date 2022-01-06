@@ -96,7 +96,8 @@ bool Display::init()
     fill(Colour::Black);
 
     // Flush buffer to screen
-    if (!update_screen())
+    ErrorStatus res = update_screen();
+    if (res != ErrorStatus::OK)
     {
         return false;
     }
@@ -117,28 +118,28 @@ void Display::fill(Colour color)
     }
 }
 
-bool Display::update_screen()
+ErrorStatus Display::update_screen()
 {
     for(uint8_t page_idx = 0; page_idx < 8; page_idx++)
     {
         // Set Page position to write to: 0-7
-        if (!send_command( static_cast<uint8_t>(acmd::start_page_0) + page_idx)) { return false; }
+        if (!send_command( static_cast<uint8_t>(acmd::start_page_0) + page_idx)) { return ErrorStatus::START_PAGE_ERR; }
 
         // Set the lower start column address of pointer by command 00h~0Fh.
-        if (!send_command( static_cast<uint8_t>(acmd::start_lcol_0) )) { return false; }
+        if (!send_command( static_cast<uint8_t>(acmd::start_lcol_0) )) { return ErrorStatus::START_LCOL_ERR; }
 
         // Set the upper start column address of pointer by command 10h~1Fh
-        if (!send_command( static_cast<uint8_t>(acmd::start_hcol_0) )) { return false; }
+        if (!send_command( static_cast<uint8_t>(acmd::start_hcol_0) )) { return ErrorStatus::START_HCOL_ERR; }
 
         // the next page position within the GDDRAM buffer
         uint16_t page_pos_gddram {static_cast<uint16_t>( m_page_width * page_idx )};
 
-        if (!send_page_data(page_pos_gddram)) { return false; }
+        if (!send_page_data(page_pos_gddram)) { return ErrorStatus::SEND_DATA_ERR; }
 
         //dump_buffer(true);
     }
         
-    return true;
+    return ErrorStatus::OK;
 }
 
 bool Display::send_command(uint8_t cmd_byte [[maybe_unused]])
@@ -164,12 +165,14 @@ bool Display::send_command(uint8_t cmd_byte [[maybe_unused]])
             #if defined(USE_RTT) 
                 SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
             #endif
+            
         }
         if (!embed_utils::spi::ll_wait_for_bsy_flag(m_spi_port))
         {
             #if defined(USE_RTT) 
                 SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
             #endif
+            
         }  
         // set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
         LL_GPIO_ResetOutputPin(m_dc_port, m_dc_pin);      
@@ -204,12 +207,14 @@ bool Display::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
                 #endif
+                
             }
             if (!embed_utils::spi::ll_wait_for_bsy_flag(m_spi_port))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 
                 #endif
+                
             }                          
             LL_SPI_TransmitData8(m_spi_port, m_buffer[idx]);
             // set data mode/high signal after we put data into TXFIFO to avoid premature latching
@@ -221,7 +226,7 @@ bool Display::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
     #endif  // defined(USE_SSD1306_HAL_DRIVER)
 } 
 
-bool Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
+void Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
 {
     // Draw in the right color
     if(color == Colour::White) 
@@ -239,7 +244,7 @@ bool Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
         #endif
     }
 
-    return true;
+
 }
 
 bool Display::set_cursor(uint8_t x, uint8_t y)

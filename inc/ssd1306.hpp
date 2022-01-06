@@ -58,6 +58,28 @@ enum class Colour: uint16_t
     White = 0x01  
 };
 
+// @brief SSD1306 error status
+enum class ErrorStatus {
+	// @brief operation successful
+	OK,
+	// @brief write overflowed SSD1306 display width/height
+	LINE_OVRFLW,
+	// @brief provided pixel index is out of bounds
+	PIXEL_OOB,
+	// @brief cursor falls outside of display area
+	CURSOR_OOB,
+	// @brief error sending Page position command to SSD1306
+	START_PAGE_ERR,
+	// @brief error sending low column value command to SSD1306
+	START_LCOL_ERR,
+	// @brief error sending high column value command to SSD1306
+	START_HCOL_ERR,
+	// @brief error sending buffer data command to SSD1306
+	SEND_DATA_ERR,
+	// @brief bad things happened here
+	UNKNOWN_ERR
+};
+
 // @brief 
 class Display
 {
@@ -81,9 +103,9 @@ public:
 	// @param fg The foreground colour
 	// @param padding add an extra pixel to the vertical edge of the character
 	// @param update write the sw buffer to the IC
-	// @return char 
+	// @return ErrorStatus 
 	template<std::size_t FONT_SIZE> 
-	bool write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
+	ErrorStatus write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
 
 
 	// @brief Get the display width. Can be used to create a std::array
@@ -93,6 +115,8 @@ public:
 	// @brief Get the display height. Can be used to create a std::array
 	// @return constexpr uint16_t 
 	static constexpr uint16_t get_display_height() { return m_height; }
+
+
 
 #if defined(X86_UNIT_TESTING_ONLY) || defined(USE_RTT)
 	// @brief Debug function to display entire SW bufefr to console (uses RTT on arm, uses std::cout on x86) 
@@ -106,10 +130,10 @@ private:
 	// @param x pos
 	// @param y pos
 	// @param colour white/black
-	bool draw_pixel(uint8_t x, uint8_t y, Colour colour);
+	void draw_pixel(uint8_t x, uint8_t y, Colour colour);
 
 	// @brief Write the sw buffer to the IC GDDRAM (Page Addressing Mode only)
-	bool update_screen();
+	ErrorStatus update_screen();
 
 	// @brief Reset the Driver IC and SW buffer.
 	void reset();
@@ -333,9 +357,9 @@ protected:
 	// @param font 
 	// @param colour 
 	// @param padding 
-	// @return char 
+	// @return ErrorStatus 
 	template<std::size_t FONT_SIZE> 
-	bool write_string(std::string &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);
+	ErrorStatus write_string(std::string &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);
 
 	// @brief 
 	// @tparam FONT_SIZE 
@@ -343,9 +367,9 @@ protected:
 	// @param font 
 	// @param colour 
 	// @param padding 
-	// @return char 
+	// @return ErrorStatus 
 	template<std::size_t FONT_SIZE> 
-	char write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
+	ErrorStatus write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
 
 
 };
@@ -353,38 +377,47 @@ protected:
 // Out-of-class definitions of member function templates 
 
 template<std::size_t FONT_SIZE>
-bool Display::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update)
+ErrorStatus Display::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update)
 {
-	bool success {true};
     fill(bg);
-    if (!set_cursor(x, y))
+    // invalid cursor position requested
+	if (!set_cursor(x, y))
 	{
-		return 0;
+		return ErrorStatus::CURSOR_OOB;
 	}
-    success = write_string(msg, font, fg, padding);
-    if ((success) && (update))
+
+	ErrorStatus write_res = write_string(msg, font, fg, padding);
+	if (write_res != ErrorStatus::OK)
+	{
+		return write_res;
+	}
+    
+	// if update was selected then we can just return the result now
+	if (update)
     {
-        update_screen();
+		return update_screen();
     }
-    return success;
+    
+	return ErrorStatus::OK;
 }
 
 template<std::size_t FONT_SIZE>
-bool Display::write_string(std::string &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
+ErrorStatus Display::write_string(std::string &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
 {
     // Write until null-byte
 	for (char &c : ss)
 	{
-		if (write_char(c, font, color, padding) != c)
+		ErrorStatus res = write_char(c, font, color, padding);
+		if (res != ErrorStatus::OK)
 		{
-			return false;
+			return res;
 		}
 	}
-    return true;
+    return ErrorStatus::OK;
 }
 
 template<std::size_t FONT_SIZE>
-char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding)
+ErrorStatus Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding)
 {
 
     // Check remaining space on current line
@@ -392,7 +425,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool pad
         m_page_width <= (m_currenty + font.height()))
     {
         // Not enough space on current line
-        return 0;
+        return ErrorStatus::OK;
     }
 
     // add extra leading horizontal space
@@ -400,10 +433,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool pad
     {
     	for(size_t n = 0; n < font.height(); n++)
 		{
-			if (!draw_pixel(m_currentx, (m_currenty + n), Colour::Black))
-			{
-				return false;
-			}
+			draw_pixel(m_currentx, (m_currenty + n), Colour::Black);
 		}
     	m_currentx += 1;
     }
@@ -412,7 +442,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool pad
     uint32_t font_data_word;
     for(size_t font_height_idx = 0; font_height_idx < font.height(); font_height_idx++) 
 	{
-        if (!font.get_pixel( (ch - 32) * font.height() + font_height_idx, font_data_word )) { return false; }
+        if (!font.get_pixel( (ch - 32) * font.height() + font_height_idx, font_data_word )) { return ErrorStatus::PIXEL_OOB; }
 
 		#ifdef ENABLE_SSD1306_TEST_STDOUT
 				// separator for the font
@@ -428,17 +458,11 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool pad
             	switch (colour)
 				{
 					case Colour::White:
-						if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White))
-						{
-							return false;
-						}
+						draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White);
 						break;
 					
 					case Colour::Black:
-						if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black))
-						{
-							return false;
-						}
+						draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black);
 						break;
 				}			
             }
@@ -448,17 +472,11 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool pad
             	switch (colour)
 				{
 					case Colour::White:
-						if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black))
-						{
-							return false;
-						}
+						draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black);
 						break;
 					
 					case Colour::Black:
-						if (!draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White))
-						{
-							return false;
-						}
+						draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White);
 						break;
 				}						
             }
@@ -475,7 +493,7 @@ char Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool pad
 	}
 
     // Return written char for validation
-    return ch;
+    return ErrorStatus::OK;
 }
 
 

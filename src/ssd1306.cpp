@@ -35,11 +35,17 @@
 namespace ssd1306
 {
 
+Display::Display()
+{
+    // initialise the SPI handle used in this class
+    _spi_handle = std::unique_ptr<SPI_TypeDef>(SPI1);
+}
+
 bool Display::init()
 {
     #if defined(USE_SSD1306_LL_DRIVER)
-        LL_SPI_Enable(m_spi_port);
-        if (!LL_SPI_IsEnabled(m_spi_port))
+        LL_SPI_Enable(_spi_handle.get());
+        if (!LL_SPI_IsEnabled(_spi_handle.get()))
         {
             return false;
         }
@@ -152,7 +158,7 @@ bool Display::send_command(uint8_t cmd_byte [[maybe_unused]])
         HAL_StatusTypeDef res = HAL_OK;
         //HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_RESET); // select Display
         HAL_GPIO_WritePin(m_dc_port, m_dc_pin, GPIO_PIN_RESET); // command
-        res = HAL_SPI_Transmit(&m_spi_port, (uint8_t *) &cmd_byte, 1, HAL_MAX_DELAY);
+        res = HAL_SPI_Transmit(&_spi_handle.get(), (uint8_t *) &cmd_byte, 1, HAL_MAX_DELAY);
         if (res != HAL_OK)
         {
             return false;
@@ -160,14 +166,14 @@ bool Display::send_command(uint8_t cmd_byte [[maybe_unused]])
         return true;
         //HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_SET); // un-select Display
     #elif defined(USE_SSD1306_LL_DRIVER)
-        if (!embed_utils::spi::ll_wait_for_txe_flag(m_spi_port))
+        if (!stm32::spi::ll_wait_for_txe_flag(_spi_handle))
         {
             #if defined(USE_RTT) 
                 SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
             #endif
             
         }
-        if (!embed_utils::spi::ll_wait_for_bsy_flag(m_spi_port))
+        if (!stm32::spi::ll_wait_for_bsy_flag(_spi_handle))
         {
             #if defined(USE_RTT) 
                 SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
@@ -176,7 +182,7 @@ bool Display::send_command(uint8_t cmd_byte [[maybe_unused]])
         }  
         // set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
         LL_GPIO_ResetOutputPin(m_dc_port, m_dc_pin);      
-        LL_SPI_TransmitData8(m_spi_port, cmd_byte);    
+        LL_SPI_TransmitData8(_spi_handle.get(), cmd_byte);    
         
         return true;
     #else   
@@ -191,7 +197,7 @@ bool Display::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
 
         HAL_StatusTypeDef res = HAL_OK;        
         HAL_GPIO_WritePin(m_dc_port, m_dc_pin, GPIO_PIN_SET); // data
-        res = HAL_SPI_Transmit(&m_spi_port, data_buffer[page_pos_gddram], m_page_width, HAL_MAX_DELAY);
+        res = HAL_SPI_Transmit(&_spi_handle.get(), data_buffer[page_pos_gddram], m_page_width, HAL_MAX_DELAY);
         if (res != HAL_OK)
         {
             return false;
@@ -202,21 +208,21 @@ bool Display::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
         // transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
         for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
         {
-            if (!embed_utils::spi::ll_wait_for_txe_flag(m_spi_port))
+            if (!stm32::spi::ll_wait_for_txe_flag(_spi_handle))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
                 #endif
                 
             }
-            if (!embed_utils::spi::ll_wait_for_bsy_flag(m_spi_port))
+            if (!stm32::spi::ll_wait_for_bsy_flag(_spi_handle))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 
                 #endif
                 
             }                          
-            LL_SPI_TransmitData8(m_spi_port, m_buffer[idx]);
+            LL_SPI_TransmitData8(_spi_handle.get(), m_buffer[idx]);
             // set data mode/high signal after we put data into TXFIFO to avoid premature latching
             LL_GPIO_SetOutputPin(m_dc_port, m_dc_pin);         
         }

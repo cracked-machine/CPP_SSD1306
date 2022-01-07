@@ -29,6 +29,7 @@
 #include <font.hpp>
 #include <array>
 #include <string>
+#include <memory>
 
 #if defined(USE_SSD1306_LL_DRIVER)
     #include <bitset_utils.hpp>
@@ -84,7 +85,7 @@ enum class ErrorStatus {
 class Display
 {
 public:
-	Display() = default;
+	Display();
 
 	// @brief write setup commands to the IC
 	bool init();
@@ -125,6 +126,9 @@ public:
 #endif
 
 private:
+
+    // @brief The CMSIS mem-mapped SPI device
+    std::unique_ptr<SPI_TypeDef> _spi_handle;
 
 	// @brief Write a pixel to the sw buffer at the corresponding display coordinates 
 	// @param x pos
@@ -175,8 +179,6 @@ private:
 	// @brief The reset GPIO pin
 	uint16_t m_reset_pin {SPI1_RESET_Pin};
 #elif defined(USE_SSD1306_LL_DRIVER)
-	// @brief The LL SPI object
-	SPI_TypeDef	*m_spi_port 	{SPI1};
 	// @brief The reset GPIO port object
 	GPIO_TypeDef *m_reset_port 	{SPI1_RESET_GPIO_Port};
 	// @brief The reset GPIO pin

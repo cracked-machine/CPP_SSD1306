@@ -46,11 +46,15 @@
 	#include <iostream>
 #endif
 
-
+// DMA1_Channel1_IRQHandler
+#include <dma_ch1_interrupt_handler.hpp>
 
 
 namespace ssd1306
 {
+
+// forward declaration 
+class DMA1_CH1_InterruptHandler;
 
 // @brief colour range of the OLED(!)
 enum class Colour: uint16_t
@@ -85,7 +89,13 @@ enum class ErrorStatus {
 class Display
 {
 public:
-	Display();
+	enum class SPIDMA
+	{
+		disabled,
+		enabled
+	};
+	
+	Display(SPI_TypeDef *spi_handle, SPIDMA dma_option);
 
 	// @brief write setup commands to the IC
 	bool init();
@@ -129,6 +139,11 @@ private:
 
     // @brief The CMSIS mem-mapped SPI device
     std::unique_ptr<SPI_TypeDef> _spi_handle;
+
+    // EXTI4_15InterruptHandler* interrupt_ptr; 
+    std::unique_ptr<DMA1_CH1_InterruptHandler> interrupt_handler; 	
+
+	SPIDMA spi_dma_setting {SPIDMA::disabled};
 
 	// @brief Write a pixel to the sw buffer at the corresponding display coordinates 
 	// @param x pos
@@ -244,41 +259,32 @@ private:
 	// @brief SSD1306 Address Commands
 	enum class acmd
 	{	
-		// @brief Set the addressing mode - use one of the below modes (Page Address Mode supported only)
-		set_memory_mode = 		0x20,
-		// @brief Horizontal Addressing Mode
-		horiz_addr_mode = 		0x00,
-		// @brief Vertical Addressing Mode
-		vert_addr_mode = 		0x01,
-		// @brief Page Addressing Mode
-		page_addr_mode = 		0x02,
-
-		// @brief Start at Page #0
-		start_page_0 =			0xB0,
-		// @brief Start at Page #1
-		start_page_1 = 			0xB1,
-		// @brief Start at Page #2
-		start_page_2 = 			0xB2,
-		// @brief Start at Page #3
-		start_page_3 = 			0xB3,
-		// @brief Start at Page #4
-		start_page_4 = 			0xB4,
-		// @brief Start at Page #5
-		start_page_5 = 			0xB5,
-		// @brief Start at Page #6
-		start_page_6 = 			0xB6,
-		// @brief Start at Page #7
-		start_page_7 = 			0xB7,
 		
-		// @brief Start at lower column address - address position min
-		start_lcol_0 = 			0x00,
-		// @brief Start at lower column address - address position max
-		start_lcol_15 = 		0x0F,
+		set_memory_mode = 		0x20,		// @brief Set the addressing mode - use one of the below modes
+		horiz_addr_mode = 		0x00,		// @brief Horizontal Addressing Mode
+		vert_addr_mode = 		0x01,		// @brief Vertical Addressing Mode
+		page_addr_mode = 		0x02,		// @brief Page Addressing Mode
 
-		// @brief Start at higher column address - address position min
-		start_hcol_0 = 			0x10,
-		// @brief Start at higher column address - address position max
-		start_hcol_15 =			0x1F
+		set_column_address = 	0x21,		// Setup column start and end address. Horizontal or vertical addressing mode only.
+		set_page_address = 		0x22,		// Setup page start and end address. Horizontal or vertical addressing mode only.
+
+		// @brief Set Page Start Address for Page Addressing Mode
+		start_page_0 =			0xB0,	// @brief Start at Page #0	
+		start_page_1 = 			0xB1,	// @brief Start at Page #1	
+		start_page_2 = 			0xB2, 	// @brief Start at Page #2	
+		start_page_3 = 			0xB3,	// @brief Start at Page #3
+		start_page_4 = 			0xB4,	// @brief Start at Page #4
+		start_page_5 = 			0xB5,	// @brief Start at Page #5
+		start_page_6 = 			0xB6,	// @brief Start at Page #6
+		start_page_7 = 			0xB7,	// @brief Start at Page #7
+		
+		// @brief Set the lower nibble of the column start address register for Page Addressing Mode
+		start_lcol_0 = 			0x00,	// lowest address
+		start_lcol_15 = 		0x0F,	// highest address
+
+		// @brief Set the higher nibble of the column start address register for Page Addressing Mode
+		start_hcol_0 = 			0x10,	// lowest address
+		start_hcol_15 =			0x1F	// highest address
 
 	};	
 

@@ -140,9 +140,10 @@ private:
     // @brief The CMSIS mem-mapped SPI device
     std::unique_ptr<SPI_TypeDef> _spi_handle;
 
-    // EXTI4_15InterruptHandler* interrupt_ptr; 
+    // @brief DMA1_CH1_InterruptHandler* interrupt_ptr; 
     std::unique_ptr<DMA1_CH1_InterruptHandler> interrupt_handler; 	
 
+	// @brief Stored setting for enabling/disabling DMA
 	SPIDMA spi_dma_setting {SPIDMA::disabled};
 
 	// @brief Write a pixel to the sw buffer at the corresponding display coordinates 

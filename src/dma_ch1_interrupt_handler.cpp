@@ -33,7 +33,7 @@ DMA1_CH1_InterruptHandler::DMA1_CH1_InterruptHandler(std::unique_ptr<ssd1306::Di
     std::unique_ptr<ISRManagerBaseSTM32G0> this_ext_interrupt = std::unique_ptr<ISRManagerBaseSTM32G0>(this);
     // Pass the interrupt number/driver pointer up to the base class.
     ISRManagerBaseSTM32G0::register_handler(
-        isr::stm32g0::ISRManagerBaseSTM32G0::InterruptList::dma_ch1_irqhandler, 
+        isr::stm32g0::ISRManagerBaseSTM32G0::InterruptList::dma_ch1, 
         this_ext_interrupt);
 }
 

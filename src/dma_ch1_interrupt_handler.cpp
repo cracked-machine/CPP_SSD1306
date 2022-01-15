@@ -29,9 +29,9 @@ namespace ssd1306
 DMA1_CH1_InterruptHandler::DMA1_CH1_InterruptHandler(std::unique_ptr<ssd1306::Display> &driver_instance)
 : _driver_instance (std::move(driver_instance))
 {
-    std::unique_ptr<InterruptManagerBase> this_ext_interrupt = std::unique_ptr<InterruptManagerBase>(this);
-    InterruptManagerBase::register_handler(
-        isr::stm32g0::InterruptManagerBase::ISRVectorTableEnums::dma_ch1_irqhandler, 
+    std::unique_ptr<ISRManagerBaseSTM32G0> this_ext_interrupt = std::unique_ptr<ISRManagerBaseSTM32G0>(this);
+    ISRManagerBaseSTM32G0::register_handler(
+        isr::stm32g0::ISRManagerBaseSTM32G0::ISRVectorTableEnums::dma_ch1_irqhandler, 
         this_ext_interrupt);
 }
 

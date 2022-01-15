@@ -23,7 +23,7 @@
 #ifndef __DMA_CH1_INTERRUPT_HANDLER_HPP__
 #define __DMA_CH1_INTERRUPT_HANDLER_HPP__
 
-#include <interrupt_manager_base.hpp>
+#include <isr_manager_base_stm32g0.hpp>
 
 #include <memory>
 
@@ -32,14 +32,14 @@ namespace ssd1306
 class Display;
 
 // @brief class for handling DMA_CH1 interrupts
-class DMA1_CH1_InterruptHandler : public isr::stm32g0::InterruptManagerBase
+class DMA1_CH1_InterruptHandler : public isr::stm32g0::ISRManagerBaseSTM32G0
 {
 public:
     // @brief Construct a new DMA_CH1_InterruptHandler object
     // @param driver_instance The driver to call when the interrupt is triggered.
     DMA1_CH1_InterruptHandler(std::unique_ptr<ssd1306::Display> &driver_instance);
 
-    // @brief called by isr::stm32g0::InterruptManagerBase when registered interrupt is triggered by MCU
+    // @brief called by isr::stm32g0::ISRManagerBaseSTM32G0 when registered interrupt is triggered by MCU
     virtual void ISR(void);
 
 private:

@@ -46,15 +46,10 @@
 	#include <iostream>
 #endif
 
-// DMA1_Channel1_IRQHandler
-#include <dma_ch1_interrupt_handler.hpp>
-
 
 namespace ssd1306
 {
 
-// forward declaration 
-class DMA1_CH1_InterruptHandler;
 
 // @brief colour range of the OLED(!)
 enum class Colour: uint16_t
@@ -127,6 +122,8 @@ public:
 	// @return constexpr uint16_t 
 	static constexpr uint16_t get_display_height() { return m_height; }
 
+	void dma1_ch2_isr();
+
 
 
 #if defined(X86_UNIT_TESTING_ONLY) || defined(USE_RTT)
@@ -141,7 +138,7 @@ private:
     std::unique_ptr<SPI_TypeDef> _spi_handle;
 
     // @brief DMA1_CH1_InterruptHandler* interrupt_ptr; 
-    std::unique_ptr<DMA1_CH1_InterruptHandler> interrupt_handler; 	
+    // std::unique_ptr<DMA1_CH1_InterruptHandler> interrupt_handler; 	
 
 	// @brief Stored setting for enabling/disabling DMA
 	SPIDMA spi_dma_setting {SPIDMA::disabled};

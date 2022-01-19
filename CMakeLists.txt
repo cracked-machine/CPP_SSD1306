@@ -7,7 +7,7 @@ target_sources(${BUILD_NAME} PRIVATE
     src/font11x18.cpp
     src/font16x26.cpp
     src/ssd1306.cpp
-    src/dma_ch1_interrupt_handler.cpp
+
 )
 
 target_include_directories(${BUILD_NAME} PRIVATE 

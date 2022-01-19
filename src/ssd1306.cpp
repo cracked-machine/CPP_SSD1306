@@ -27,13 +27,13 @@
 
 #include <iomanip>
 #include <cstring>
+#include <functional>
 
 #ifdef USE_FULL_LL_DRIVER
     #include <ll_spi_utils.hpp>
 #endif
 
-// DMA1_Channel1_IRQHandler
-#include <dma_ch1_interrupt_handler.hpp>
+#include <stm32g0_interrupt_manager.hpp>
 
 namespace ssd1306
 {
@@ -49,9 +49,13 @@ bool Display::init()
 
     if (spi_dma_setting == SPIDMA::enabled)
     {
-        // pass this Driver instance to the external interrupt manager to allow ISR() to callback
-        std::unique_ptr<Display> this_driver = std::unique_ptr<Display>(this);
-        interrupt_handler = std::make_unique<DMA1_CH1_InterruptHandler>(this_driver);        
+  
+        // register the isr function with STM32G0InterruptManager
+        std::function<void()> new_dma_callback = [this](){  this->dma1_ch2_isr();  };
+        stm32::isr::STM32G0InterruptManager::register_callback(
+            stm32::isr::STM32G0InterruptManager::InterruptType::dma1_ch2,
+            new_dma_callback);
+
     }
 
     #if defined(USE_SSD1306_LL_DRIVER)
@@ -170,6 +174,15 @@ void Display::fill(Colour color)
     {
         pixel = (color == Colour::Black) ? 0x00 : 0xFF;
     }
+}
+
+void Display::dma1_ch2_isr()
+{
+    // m_driver_instance->get_display_height();
+
+    // prevent ISR lockup
+    LL_DMA_ClearFlag_HT1(DMA1);
+    LL_DMA_ClearFlag_TC1(DMA1);
 }
 
 ErrorStatus Display::update_screen()

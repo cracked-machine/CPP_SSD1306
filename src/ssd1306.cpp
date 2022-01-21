@@ -33,7 +33,7 @@
     #include <ll_spi_utils.hpp>
 #endif
 
-#include <stm32g0_interrupt_manager.hpp>
+
 
 namespace ssd1306
 {
@@ -50,12 +50,16 @@ bool Display::init()
     if (spi_dma_setting == SPIDMA::enabled)
     {
   
-        // register the isr function with STM32G0InterruptManager
-        std::function<void()> new_dma_callback = [this](){  this->dma1_ch2_isr();  };
-        stm32::isr::STM32G0InterruptManager::register_callback(
-            stm32::isr::STM32G0InterruptManager::InterruptType::dma1_ch2,
-            new_dma_callback);
-
+        // register the interrupt with STM32G0InterruptManager
+        #ifdef USE_RAWPTR_ISR
+                m_dma_int_handler.register_driver(this);
+        #endif
+        #ifdef USE_FUNCTIONAL_ISR        
+                std::function<void()> new_dma_callback = [this](){  dma1_ch2_isr();  };
+                stm32::isr::STM32G0InterruptManager::register_callback(
+                    stm32::isr::STM32G0InterruptManager::InterruptType::dma1_ch2,
+                    new_dma_callback);
+        #endif 
     }
 
     #if defined(USE_SSD1306_LL_DRIVER)

@@ -31,6 +31,9 @@
 #include <string>
 #include <memory>
 
+// disable dynamic allocation/copying
+#include <ControlledBase.hpp>
+
 #if defined(USE_SSD1306_LL_DRIVER)
     #include <bitset_utils.hpp>
 #endif
@@ -46,6 +49,7 @@
 	#include <iostream>
 #endif
 
+#include <stm32g0_interrupt_manager.hpp>
 
 namespace ssd1306
 {
@@ -80,8 +84,10 @@ enum class ErrorStatus {
 	UNKNOWN_ERR
 };
 
+
+
 // @brief 
-class Display
+class Display : public ControlledBase
 {
 public:
 	enum class SPIDMA
@@ -122,9 +128,9 @@ public:
 	// @return constexpr uint16_t 
 	static constexpr uint16_t get_display_height() { return m_height; }
 
+	// @brief callback function for STM32G0InterruptManager 
+	// see stm32_interrupt_managers/inc/stm32g0_interrupt_manager_functional.hpp
 	void dma1_ch2_isr();
-
-
 
 #if defined(X86_UNIT_TESTING_ONLY) || defined(USE_RTT)
 	// @brief Debug function to display entire SW bufefr to console (uses RTT on arm, uses std::cout on x86) 
@@ -133,6 +139,28 @@ public:
 #endif
 
 private:
+
+#ifdef USE_RAWPTR_ISR
+	struct DmaIntHandler : public stm32::isr::STM32G0InterruptManager
+	{
+		// @brief the parent driver class
+		Display *m_parent_driver_ptr;
+		// @brief initialise and register this handler instance with STM32G0InterruptManager
+		// @param parent_driver_ptr the instance to register
+		void register_driver(Display *parent_driver_ptr)
+		{
+			m_parent_driver_ptr = parent_driver_ptr;
+			stm32::isr::STM32G0InterruptManager::register_handler(stm32::isr::STM32G0InterruptManager::InterruptType::dma1_ch2, this);
+		}
+		// @brief The callback used by STM32G0InterruptManager
+		virtual void ISR()
+		{
+			m_parent_driver_ptr->dma1_ch2_isr();
+		}
+	};
+	// @brief handler object
+	DmaIntHandler m_dma_int_handler;
+#endif // USE_RAWPTR_ISR
 
     // @brief The CMSIS mem-mapped SPI device
     std::unique_ptr<SPI_TypeDef> _spi_handle;

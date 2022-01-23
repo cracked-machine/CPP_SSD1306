@@ -138,7 +138,10 @@ public:
 	void dump_buffer(bool hex);
 #endif
 
+	
+
 private:
+
 
 #ifdef USE_RAWPTR_ISR
 	struct DmaIntHandler : public stm32::isr::STM32G0InterruptManager

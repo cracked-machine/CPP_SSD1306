@@ -32,7 +32,7 @@
 #include <memory>
 
 // disable dynamic allocation/copying
-#include <ControlledBase.hpp>
+#include <allocation_restricted_base.hpp>
 
 #if defined(USE_SSD1306_LL_DRIVER)
     #include <bitset_utils.hpp>
@@ -87,7 +87,7 @@ enum class ErrorStatus {
 
 
 // @brief 
-class Display : public ControlledBase
+class Display : public AllocationRestrictedBase
 {
 public:
 	enum class SPIDMA

@@ -414,9 +414,9 @@ protected:
 // Out-of-class definitions of member function templates 
 
 template<std::size_t FONT_SIZE>
-ErrorStatus Display::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update)
+ErrorStatus Display::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, [[maybe_unused]] Colour bg, Colour fg, bool padding, bool update)
 {
-    fill(bg);
+    // fill(bg);
     // invalid cursor position requested
 	if (!set_cursor(x, y))
 	{

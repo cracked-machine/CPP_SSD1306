@@ -142,8 +142,6 @@ public:
 
 private:
 
-
-#ifdef USE_RAWPTR_ISR
 	struct DmaIntHandler : public stm32::isr::STM32G0InterruptManager
 	{
 		// @brief the parent driver class
@@ -163,7 +161,6 @@ private:
 	};
 	// @brief handler object
 	DmaIntHandler m_dma_int_handler;
-#endif // USE_RAWPTR_ISR
 
     // @brief The CMSIS mem-mapped SPI device
     std::unique_ptr<SPI_TypeDef> _spi_handle;

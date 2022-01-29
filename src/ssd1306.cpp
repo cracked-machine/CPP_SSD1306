@@ -49,17 +49,8 @@ bool Display::init()
 
     if (spi_dma_setting == SPIDMA::enabled)
     {
-  
         // register the interrupt with STM32G0InterruptManager
-        #ifdef USE_RAWPTR_ISR
-                m_dma_int_handler.register_driver(this);
-        #endif
-        #ifdef USE_FUNCTIONAL_ISR        
-                std::function<void()> new_dma_callback = [this](){  dma1_ch2_isr();  };
-                stm32::isr::STM32G0InterruptManager::register_callback(
-                    stm32::isr::STM32G0InterruptManager::InterruptType::dma1_ch2,
-                    new_dma_callback);
-        #endif 
+        m_dma_int_handler.register_driver(this);
     }
 
     #if defined(USE_SSD1306_LL_DRIVER)

@@ -24,16 +24,9 @@
 // https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf
 
 #include "ssd1306.hpp"
-
 #include <iomanip>
 #include <cstring>
-#include <functional>
-
-#ifdef USE_FULL_LL_DRIVER
-    #include <ll_spi_utils.hpp>
-#endif
-
-
+#include <ll_spi_utils.hpp>
 
 namespace ssd1306
 {
@@ -53,22 +46,19 @@ bool Display::init()
         m_dma_int_handler.register_driver(this);
     }
 
-    #if defined(USE_SSD1306_LL_DRIVER)
-        LL_SPI_Enable(_spi_handle.get());
-        if (!LL_SPI_IsEnabled(_spi_handle.get()))
-        {
-            return false;
-        }
-    #endif
+
+    LL_SPI_Enable(_spi_handle.get());
+    if (!LL_SPI_IsEnabled(_spi_handle.get()))
+    {
+        return false;
+    }
+
 
 	reset();
 
     // Now wait for the screen to boot
-    #if defined(USE_SSD1306_HAL_DRIVER)
-        HAL_Delay(100);
-    #elif defined(USE_SSD1306_LL_DRIVER)
-        LL_mDelay(10);
-    #endif
+    LL_mDelay(10);
+
 
     // put into sleep mode during setup, probably not needed
     if (!send_command( static_cast<uint8_t>(fcmd::display_mode_sleep) )) { return false; } 
@@ -103,7 +93,6 @@ bool Display::init()
         if (!send_command( static_cast<uint8_t>(acmd::start_lcol_0) )) { return false; } 
         if (!send_command( static_cast<uint8_t>(acmd::start_hcol_0) )) { return false; } 
     }
-
 
     // set hardware config commands
     if (!send_command( static_cast<uint8_t>(hwcmd::start_line_0) )) { return false; } 
@@ -147,7 +136,6 @@ bool Display::init()
     
     }
 
-
     // Flush buffer to screen
     ErrorStatus res = update_screen();
     if (res != ErrorStatus::OK)
@@ -173,8 +161,6 @@ void Display::fill(Colour color)
 
 void Display::dma1_ch2_isr()
 {
-    // m_driver_instance->get_display_height();
-
     // prevent ISR lockup
     LL_DMA_ClearFlag_HT1(DMA1);
     LL_DMA_ClearFlag_TC1(DMA1);
@@ -215,57 +201,32 @@ bool Display::send_command(uint8_t cmd_byte [[maybe_unused]])
     //     SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
     // #endif  
 
-    #if defined(USE_SSD1306_HAL_DRIVER)
-        HAL_StatusTypeDef res = HAL_OK;
-        //HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_RESET); // select Display
-        HAL_GPIO_WritePin(m_dc_port, m_dc_pin, GPIO_PIN_RESET); // command
-        res = HAL_SPI_Transmit(&_spi_handle.get(), (uint8_t *) &cmd_byte, 1, HAL_MAX_DELAY);
-        if (res != HAL_OK)
-        {
-            return false;
-        }
-        return true;
-        //HAL_GPIO_WritePin(m_cs_port, m_cs_pin, GPIO_PIN_SET); // un-select Display
-    #elif defined(USE_SSD1306_LL_DRIVER)
-        if (!stm32::spi::ll_wait_for_txe_flag(_spi_handle))
-        {
-            #if defined(USE_RTT) 
-                SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
-            #endif
-            
-        }
-        if (!stm32::spi::ll_wait_for_bsy_flag(_spi_handle))
-        {
-            #if defined(USE_RTT) 
-                SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
-            #endif
-            
-        }  
-        // set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
-        LL_GPIO_ResetOutputPin(m_dc_port, m_dc_pin);      
-        LL_SPI_TransmitData8(_spi_handle.get(), cmd_byte);    
+    if (!stm32::spi::ll_wait_for_txe_flag(_spi_handle))
+    {
+        #if defined(USE_RTT) 
+            SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
+        #endif
         
-        return true;
-    #else   
-        return true;
-    #endif
+    }
+    if (!stm32::spi::ll_wait_for_bsy_flag(_spi_handle))
+    {
+        #if defined(USE_RTT) 
+            SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
+        #endif
+        
+    }  
+    // set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
+    LL_GPIO_ResetOutputPin(m_dc_port, m_dc_pin);      
+    LL_SPI_TransmitData8(_spi_handle.get(), cmd_byte);    
     
+    return true;
 }
 
 bool Display::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
 {
-    #if defined(USE_SSD1306_HAL_DRIVER)
-
-        HAL_StatusTypeDef res = HAL_OK;        
-        HAL_GPIO_WritePin(m_dc_port, m_dc_pin, GPIO_PIN_SET); // data
-        res = HAL_SPI_Transmit(&_spi_handle.get(), data_buffer[page_pos_gddram], m_page_width, HAL_MAX_DELAY);
-        if (res != HAL_OK)
-        {
-            return false;
-        }
+    #if defined(X86_UNIT_TESTING_ONLY)
         return true;
-
-    #elif defined(USE_SSD1306_LL_DRIVER)
+    #else
         // transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
         for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
         {
@@ -288,8 +249,6 @@ bool Display::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
             LL_GPIO_SetOutputPin(m_dc_port, m_dc_pin);         
         }
         return true;
-    #elif defined(X86_UNIT_TESTING_ONLY)
-        return true;
     #endif  // defined(USE_SSD1306_HAL_DRIVER)
 } 
 
@@ -310,8 +269,6 @@ void Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
                 std::cout << "_";
         #endif
     }
-
-
 }
 
 bool Display::set_cursor(uint8_t x, uint8_t y)
@@ -332,17 +289,10 @@ bool Display::set_cursor(uint8_t x, uint8_t y)
 void Display::reset()
 {
 	// Signal the driver IC to reset the OLED display
-    #ifdef USE_SSD1306_HAL_DRIVER
-        HAL_GPIO_WritePin(m_reset_port, m_reset_pin, GPIO_PIN_RESET);
-        HAL_Delay(10);
-        HAL_GPIO_WritePin(m_reset_port, m_reset_pin, GPIO_PIN_SET);
-        HAL_Delay(10);
-    #elif defined(USE_SSD1306_LL_DRIVER)
-        LL_GPIO_ResetOutputPin(m_reset_port, m_reset_pin);
-        LL_mDelay(10);
-        LL_GPIO_SetOutputPin(m_reset_port, m_reset_pin);
-        LL_mDelay(10);
-    #endif
+    LL_GPIO_ResetOutputPin(m_reset_port, m_reset_pin);
+    LL_mDelay(10);
+    LL_GPIO_SetOutputPin(m_reset_port, m_reset_pin);
+    LL_mDelay(10);
 
     // reset the sw buffer 
     m_buffer.fill(0);
@@ -351,48 +301,47 @@ void Display::reset()
 #if defined(X86_UNIT_TESTING_ONLY) || defined(USE_RTT)
 void Display::dump_buffer(bool hex)
 {
+    uint16_t byte_count {0};
+    for (auto& byte : m_buffer)
+    {
+        #if defined(USE_RTT)
+            // separate the buffer into pages
+            if ((byte_count) % m_page_width == 0)
+            {
+                SEGGER_RTT_printf(0, "\n\n");   
+                SEGGER_RTT_printf(0, "Page #%u:\n", ((byte_count) / m_page_width));
+            }      
+            // seperate the page into lines of 32 bytes
+            if ((byte_count) % 32 == 0)
+            {
+                SEGGER_RTT_printf(0, "\n");   
+            }                 
+            if (hex)
+            {
+                SEGGER_RTT_printf(0, "0x%02x ", +byte);
+            }
+            else 
+            {
+                SEGGER_RTT_printf(0, "%u ", +byte);
+            }
+        #elif defined(X86_UNIT_TESTING_ONLY)
+            if ((byte_count) % m_page_width == 0)
+            {
+                std::cout << std::endl << std::endl;
+            } 
+            if (hex)
+            {
+                std::cout << "0x" << std::hex << std::setfill ('0') <<  std::setw(2) << +byte << " ";
+            }
+            else
+            {
+                std::cout << +byte << " ";
+            }
 
-        uint16_t byte_count {0};
-        for (auto& byte : m_buffer)
-        {
-            #if defined(USE_RTT)
-                // separate the buffer into pages
-                if ((byte_count) % m_page_width == 0)
-                {
-                    SEGGER_RTT_printf(0, "\n\n");   
-                    SEGGER_RTT_printf(0, "Page #%u:\n", ((byte_count) / m_page_width));
-                }      
-                // seperate the page into lines of 32 bytes
-                if ((byte_count) % 32 == 0)
-                {
-                    SEGGER_RTT_printf(0, "\n");   
-                }                 
-                if (hex)
-                {
-                    SEGGER_RTT_printf(0, "0x%02x ", +byte);
-                }
-                else 
-                {
-                    SEGGER_RTT_printf(0, "%u ", +byte);
-                }
-            #elif defined(X86_UNIT_TESTING_ONLY)
-                if ((byte_count) % m_page_width == 0)
-                {
-                    std::cout << std::endl << std::endl;
-                } 
-                if (hex)
-                {
-                    std::cout << "0x" << std::hex << std::setfill ('0') <<  std::setw(2) << +byte << " ";
-                }
-                else
-                {
-                    std::cout << +byte << " ";
-                }
+        #endif   
 
-            #endif   
-
-            byte_count ++;
-        }
+        byte_count ++;
+    }
 }
 #endif
 

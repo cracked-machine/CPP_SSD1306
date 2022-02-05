@@ -34,19 +34,16 @@
 // disable dynamic allocation/copying
 #include <allocation_restricted_base.hpp>
 
-#if defined(USE_SSD1306_LL_DRIVER)
-    #include <bitset_utils.hpp>
-#endif
-
-#if defined(USE_SSD1306_HAL_DRIVER) || defined(USE_SSD1306_LL_DRIVER)
+#if defined(X86_UNIT_TESTING_ONLY)
+	// only used when unit testing on x86
+	#include <iostream>
+#else
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wvolatile"
 		#include "main.h"
 		#include "spi.h"	
 	#pragma GCC diagnostic pop
-#else
-	// only used when unit testing on x86
-	#include <iostream>
+    #include <bitset_utils.hpp>
 #endif
 
 #include <stm32g0_interrupt_manager.hpp>
@@ -208,9 +205,9 @@ private:
 	// @brief The display height, in bytes. Also the number of pages (8) multiplied by the bits per page column (8)
     static const uint16_t m_height {64};
 	
-#ifdef USE_SSD1306_HAL_DRIVER
-	// @brief The HAL SPI object
-	SPI_HandleTypeDef m_spi_port {hspi1};
+#if defined(X86_UNIT_TESTING_ONLY)
+	// x86; define nothing
+#else
 	// @brief The data/command GPIO port object
 	GPIO_TypeDef* m_dc_port {SPI1_DC_GPIO_Port};
 	// @brief The data/command GPIO pin
@@ -218,18 +215,7 @@ private:
 	// @brief The reset GPIO port object
 	GPIO_TypeDef* m_reset_port {SPI1_RESET_GPIO_Port};
 	// @brief The reset GPIO pin
-	uint16_t m_reset_pin {SPI1_RESET_Pin};
-#elif defined(USE_SSD1306_LL_DRIVER)
-	// @brief The reset GPIO port object
-	GPIO_TypeDef *m_reset_port 	{SPI1_RESET_GPIO_Port};
-	// @brief The reset GPIO pin
-	uint32_t m_reset_pin		{SPI1_RESET_Pin};
-	// @brief The data/command GPIO port object	
-	GPIO_TypeDef *m_dc_port 	{SPI1_DC_GPIO_Port};
-	// @brief The data/command GPIO pin	
-	uint32_t m_dc_pin			{SPI1_DC_Pin};
-#else
-	// x86; define nothing
+	uint16_t m_reset_pin {SPI1_RESET_Pin};	
 #endif
 
 	// @brief SSD1306 Fundamental Commands - See Section 9 of datasheet for setting bytes

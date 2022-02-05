@@ -26,31 +26,10 @@
 #ifndef __SSD1306_HPP_
 #define __SSD1306_HPP_
 
-#include <font.hpp>
-#include <array>
-#include <string>
-#include <memory>
-
-// disable dynamic allocation/copying
-#include <allocation_restricted_base.hpp>
-
-#if defined(X86_UNIT_TESTING_ONLY)
-	// only used when unit testing on x86
-	#include <iostream>
-#else
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wvolatile"
-		#include "main.h"
-		#include "spi.h"	
-	#pragma GCC diagnostic pop
-    #include <bitset_utils.hpp>
-#endif
-
-#include <stm32g0_interrupt_manager.hpp>
+#include <ssd1306_device.hpp>
 
 namespace ssd1306
 {
-
 
 // @brief colour range of the OLED(!)
 enum class Colour: uint16_t
@@ -81,32 +60,6 @@ enum class ErrorStatus {
 	UNKNOWN_ERR
 };
 
-// @brief contains pointer to SPI peripheral and associated GPIO ports/pins (as defined in CMSIS)
-class DriverSerialInterface 
-{
-public:
-	DriverSerialInterface(SPI_TypeDef *display_spi, GPIO_TypeDef* dc_port, uint16_t dc_pin, GPIO_TypeDef* reset_port, uint16_t reset_pin) 
-	: m_display_spi(display_spi), m_dc_port(dc_port), m_dc_pin(dc_pin), m_reset_port(reset_port), m_reset_pin(reset_pin)
-	{
-	}
-	SPI_TypeDef * get_spi_handle() { return m_display_spi; }
-	GPIO_TypeDef* get_dc_port() { return m_dc_port; }
-	uint16_t get_dc_pin() { return m_dc_pin; }
-	GPIO_TypeDef* get_reset_port() { return m_reset_port; }
-	uint16_t get_reset_pin() { return m_reset_pin; }
-private:
-	// @brief The SPI peripheral
-	SPI_TypeDef *m_display_spi;
-	// @brief The data/command GPIO port object
-	GPIO_TypeDef* m_dc_port;
-	// @brief The data/command GPIO pin
-	uint16_t m_dc_pin;
-	// @brief The reset GPIO port object
-	GPIO_TypeDef* m_reset_port;
-	// @brief The reset GPIO pin
-	uint16_t m_reset_pin;
-};
-
 
 // @brief 
 class Driver : public AllocationRestrictedBase
@@ -121,7 +74,7 @@ public:
 	// @brief Stored setting for enabling/disabling DMA
 	SPIDMA spi_dma_setting {SPIDMA::disabled};
 
-	Driver(DriverSerialInterface display_spi_interface, SPIDMA dma_option);
+	Driver(DriverSerialInterface &display_spi_interface, SPIDMA dma_option);
 
 	// @brief write setup commands to the IC
 	bool power_on_sequence();

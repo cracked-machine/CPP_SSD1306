@@ -81,6 +81,31 @@ enum class ErrorStatus {
 	UNKNOWN_ERR
 };
 
+// @brief contains pointer to SPI peripheral and associated GPIO ports/pins (as defined in CMSIS)
+class DriverSerialInterface 
+{
+public:
+	DriverSerialInterface(SPI_TypeDef *display_spi, GPIO_TypeDef* dc_port, uint16_t dc_pin, GPIO_TypeDef* reset_port, uint16_t reset_pin) 
+	: m_display_spi(display_spi), m_dc_port(dc_port), m_dc_pin(dc_pin), m_reset_port(reset_port), m_reset_pin(reset_pin)
+	{
+	}
+	SPI_TypeDef * get_spi_handle() { return m_display_spi; }
+	GPIO_TypeDef* get_dc_port() { return m_dc_port; }
+	uint16_t get_dc_pin() { return m_dc_pin; }
+	GPIO_TypeDef* get_reset_port() { return m_reset_port; }
+	uint16_t get_reset_pin() { return m_reset_pin; }
+private:
+	// @brief The SPI peripheral
+	SPI_TypeDef *m_display_spi;
+	// @brief The data/command GPIO port object
+	GPIO_TypeDef* m_dc_port;
+	// @brief The data/command GPIO pin
+	uint16_t m_dc_pin;
+	// @brief The reset GPIO port object
+	GPIO_TypeDef* m_reset_port;
+	// @brief The reset GPIO pin
+	uint16_t m_reset_pin;
+};
 
 
 // @brief 
@@ -93,7 +118,10 @@ public:
 		enabled
 	};
 	
-	Driver(SPI_TypeDef *spi_handle, SPIDMA dma_option);
+	// @brief Stored setting for enabling/disabling DMA
+	SPIDMA spi_dma_setting {SPIDMA::disabled};
+
+	Driver(DriverSerialInterface display_spi_interface, SPIDMA dma_option);
 
 	// @brief write setup commands to the IC
 	bool power_on_sequence();
@@ -135,10 +163,46 @@ public:
 	void dump_buffer(bool hex);
 #endif
 
-	
+protected:
+
+	// @brief The display width in bytes. Also the size of each GDDRAM page
+    static const uint16_t m_page_width {128};
+
+	// @brief The display height, in bytes. Also the number of pages (8) multiplied by the bits per page column (8)
+    static const uint16_t m_height {64};
+
+	// @brief byte buffer for ssd1306. Access to derived classes like ssd1306_tester is permitted.
+    std::array<uint8_t, (m_page_width*m_height)/8> m_buffer;
+
+	// @brief 
+	// @tparam FONT_SIZE 
+	// @param ss 
+	// @param font 
+	// @param colour 
+	// @param padding 
+	// @return ErrorStatus 
+	template<std::size_t FONT_SIZE> 
+	ErrorStatus write_string(std::string &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);
+
+	// @brief 
+	// @tparam FONT_SIZE 
+	// @param ch 
+	// @param font 
+	// @param colour 
+	// @param padding 
+	// @return ErrorStatus 
+	template<std::size_t FONT_SIZE> 
+	ErrorStatus write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
+
 
 private:
 
+	#if not defined(X86_UNIT_TESTING_ONLY)
+		// object containing SPI port/pins and pointer to CMSIS defined SPI peripheral
+		DriverSerialInterface m_serial_interface;
+	#endif
+
+	// @brief callback handler for DMA interrupts
 	struct DmaIntHandler : public stm32::isr::STM32G0InterruptManager
 	{
 		// @brief the parent driver class
@@ -159,14 +223,9 @@ private:
 	// @brief handler object
 	DmaIntHandler m_dma_int_handler;
 
-    // @brief The CMSIS mem-mapped SPI device
-    std::unique_ptr<SPI_TypeDef> _spi_handle;
 
-    // @brief DMA1_CH1_InterruptHandler* interrupt_ptr; 
-    // std::unique_ptr<DMA1_CH1_InterruptHandler> interrupt_handler; 	
-
-	// @brief Stored setting for enabling/disabling DMA
-	SPIDMA spi_dma_setting {SPIDMA::disabled};
+	// @brief Reset the Driver IC and SW buffer.
+	void reset();
 
 	// @brief Write a pixel to the sw buffer at the corresponding display coordinates 
 	// @param x pos
@@ -177,14 +236,10 @@ private:
 	// @brief Write the sw buffer to the IC GDDRAM (Page Addressing Mode only)
 	ErrorStatus update_screen();
 
-	// @brief Reset the Driver IC and SW buffer.
-	void reset();
-	
 	// @brief Set the coordinates to draw to the display
 	// @param x 
 	// @param y 
 	bool set_cursor(uint8_t x, uint8_t y);
-
 
 	// @brief Send one command over SPI 
 	// @param cmd_byte The byte to send
@@ -201,22 +256,6 @@ private:
 
 	// @brief Y coordinate for writing to the display
     uint16_t m_currenty {0};
-
-	// @brief The display height, in bytes. Also the number of pages (8) multiplied by the bits per page column (8)
-    static const uint16_t m_height {64};
-	
-#if defined(X86_UNIT_TESTING_ONLY)
-	// x86; define nothing
-#else
-	// @brief The data/command GPIO port object
-	GPIO_TypeDef* m_dc_port {SPI1_DC_GPIO_Port};
-	// @brief The data/command GPIO pin
-	uint16_t m_dc_pin {SPI1_DC_Pin};
-	// @brief The reset GPIO port object
-	GPIO_TypeDef* m_reset_port {SPI1_RESET_GPIO_Port};
-	// @brief The reset GPIO pin
-	uint16_t m_reset_pin {SPI1_RESET_Pin};	
-#endif
 
 	// @brief SSD1306 Fundamental Commands - See Section 9 of datasheet for setting bytes
 	enum class fcmd
@@ -361,36 +400,6 @@ private:
 		vcomh_vcc_083 = 		0x30,
 
 	};
-
-
-protected:
-
-	// @brief The display width in bytes. Also the size of each GDDRAM page
-    static const uint16_t m_page_width {128};
-
-	// @brief byte buffer for ssd1306. Access to derived classes like ssd1306_tester is permitted.
-    std::array<uint8_t, (m_page_width*m_height)/8> m_buffer;
-
-	// @brief 
-	// @tparam FONT_SIZE 
-	// @param ss 
-	// @param font 
-	// @param colour 
-	// @param padding 
-	// @return ErrorStatus 
-	template<std::size_t FONT_SIZE> 
-	ErrorStatus write_string(std::string &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);
-
-	// @brief 
-	// @tparam FONT_SIZE 
-	// @param ch 
-	// @param font 
-	// @param colour 
-	// @param padding 
-	// @return ErrorStatus 
-	template<std::size_t FONT_SIZE> 
-	ErrorStatus write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
-
 
 };
 

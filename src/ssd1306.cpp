@@ -31,10 +31,8 @@
 namespace ssd1306
 {
 
-Driver::Driver(SPI_TypeDef *spi_handle, SPIDMA dma_option) : spi_dma_setting (dma_option)
+Driver::Driver(DriverSerialInterface display_spi_interface, SPIDMA dma_option) : spi_dma_setting (dma_option), m_serial_interface(display_spi_interface)
 {
-    // initialise the SPI handle used in this class
-    _spi_handle = std::unique_ptr<SPI_TypeDef>(spi_handle);
 }
 
 bool Driver::power_on_sequence()
@@ -47,8 +45,8 @@ bool Driver::power_on_sequence()
     }
 
 
-    LL_SPI_Enable(_spi_handle.get());
-    if (!LL_SPI_IsEnabled(_spi_handle.get()))
+    LL_SPI_Enable(m_serial_interface.get_spi_handle());
+    if (!LL_SPI_IsEnabled(m_serial_interface.get_spi_handle()))
     {
         return false;
     }
@@ -122,17 +120,17 @@ bool Driver::power_on_sequence()
     if (spi_dma_setting == SPIDMA::enabled)
     {
         // no more commands to send so set data mode/high signal
-        LL_GPIO_SetOutputPin(m_dc_port, m_dc_pin);
+        LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());
 
-        LL_SPI_Disable(_spi_handle.get());
+        LL_SPI_Disable(m_serial_interface.get_spi_handle());
         LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.size());
         LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.data());
         LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)&SPI1->DR);
         LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
         LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
         // generate DMA request whenever the TX buffer is empty
-        LL_SPI_EnableDMAReq_TX(_spi_handle.get());
-        LL_SPI_Enable(_spi_handle.get());
+        LL_SPI_EnableDMAReq_TX(m_serial_interface.get_spi_handle());
+        LL_SPI_Enable(m_serial_interface.get_spi_handle());
     
     }
 
@@ -201,14 +199,14 @@ bool Driver::send_command(uint8_t cmd_byte [[maybe_unused]])
     //     SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
     // #endif  
 
-    if (!stm32::spi::ll_wait_for_txe_flag(_spi_handle))
+    if (!stm32::spi::ll_wait_for_txe_flag(m_serial_interface.get_spi_handle()))
     {
         #if defined(USE_RTT) 
             SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
         #endif
         
     }
-    if (!stm32::spi::ll_wait_for_bsy_flag(_spi_handle))
+    if (!stm32::spi::ll_wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
     {
         #if defined(USE_RTT) 
             SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
@@ -216,8 +214,8 @@ bool Driver::send_command(uint8_t cmd_byte [[maybe_unused]])
         
     }  
     // set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
-    LL_GPIO_ResetOutputPin(m_dc_port, m_dc_pin);      
-    LL_SPI_TransmitData8(_spi_handle.get(), cmd_byte);    
+    LL_GPIO_ResetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());      
+    LL_SPI_TransmitData8(m_serial_interface.get_spi_handle(), cmd_byte);    
     
     return true;
 }
@@ -230,23 +228,23 @@ bool Driver::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
         // transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
         for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
         {
-            if (!stm32::spi::ll_wait_for_txe_flag(_spi_handle))
+            if (!stm32::spi::ll_wait_for_txe_flag(m_serial_interface.get_spi_handle()))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
                 #endif
                 
             }
-            if (!stm32::spi::ll_wait_for_bsy_flag(_spi_handle))
+            if (!stm32::spi::ll_wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 
                 #endif
                 
             }                          
-            LL_SPI_TransmitData8(_spi_handle.get(), m_buffer[idx]);
+            LL_SPI_TransmitData8(m_serial_interface.get_spi_handle(), m_buffer[idx]);
             // set data mode/high signal after we put data into TXFIFO to avoid premature latching
-            LL_GPIO_SetOutputPin(m_dc_port, m_dc_pin);         
+            LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());         
         }
         return true;
     #endif  // defined(USE_SSD1306_HAL_DRIVER)
@@ -289,9 +287,9 @@ bool Driver::set_cursor(uint8_t x, uint8_t y)
 void Driver::reset()
 {
 	// Signal the driver IC to reset the OLED display
-    LL_GPIO_ResetOutputPin(m_reset_port, m_reset_pin);
+    LL_GPIO_ResetOutputPin(m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
     LL_mDelay(10);
-    LL_GPIO_SetOutputPin(m_reset_port, m_reset_pin);
+    LL_GPIO_SetOutputPin(m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
     LL_mDelay(10);
 
     // reset the sw buffer 

@@ -70,11 +70,11 @@ TEST_CASE("Test Fonts", "[ssd1306_fonts]")
 
 }
 
-// @brief Test the public API of the ssd1306::Display class
+// @brief Test the public API of the ssd1306::Driver class
 TEST_CASE("Test Display public API", "[ssd1306_display_public]")
 {
     static ssd1306::Font16x26 font_under_test;
-    static ssd1306::Display oled;
+    static ssd1306::Driver oled;
     REQUIRE(oled.init());
     
     SECTION("Write white on black")
@@ -100,7 +100,7 @@ TEST_CASE("Test Display public API", "[ssd1306_display_public]")
     }
 }
 
-// @brief Test the protected API of the ssd1306::Display class
+// @brief Test the protected API of the ssd1306::Driver class
 TEST_CASE("Test Display protected API", "[ssd1306_display_protected]")
 {
     static ssd1306::Font16x26 font_under_test;
@@ -158,7 +158,7 @@ TEST_CASE("SSD1306 Buffer Validation", "[ssd1306_buffer_check]")
 TEST_CASE("SSD1306 send_data")
 {
     ssd1306::Font5x7 font_under_test;
-    ssd1306::Display oled;
+    ssd1306::Driver oled;
     std::string msg("Hello");
     oled.write(msg, font_under_test, 0, 0, ssd1306::Colour::Black, ssd1306::Colour::White, true, true);
     

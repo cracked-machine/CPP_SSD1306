@@ -84,7 +84,7 @@ enum class ErrorStatus {
 
 
 // @brief 
-class Display : public AllocationRestrictedBase
+class Driver : public AllocationRestrictedBase
 {
 public:
 	enum class SPIDMA
@@ -93,7 +93,7 @@ public:
 		enabled
 	};
 	
-	Display(SPI_TypeDef *spi_handle, SPIDMA dma_option);
+	Driver(SPI_TypeDef *spi_handle, SPIDMA dma_option);
 
 	// @brief write setup commands to the IC
 	bool init();
@@ -142,10 +142,10 @@ private:
 	struct DmaIntHandler : public stm32::isr::STM32G0InterruptManager
 	{
 		// @brief the parent driver class
-		Display *m_parent_driver_ptr;
+		Driver *m_parent_driver_ptr;
 		// @brief initialise and register this handler instance with STM32G0InterruptManager
 		// @param parent_driver_ptr the instance to register
-		void register_driver(Display *parent_driver_ptr)
+		void register_driver(Driver *parent_driver_ptr)
 		{
 			m_parent_driver_ptr = parent_driver_ptr;
 			stm32::isr::STM32G0InterruptManager::register_handler(stm32::isr::STM32G0InterruptManager::InterruptType::dma1_ch2, this);
@@ -241,10 +241,10 @@ private:
 		// @brief Inverse display - 1 in RAM: OFF in display panel, 0 in RAM: ON in display panel
 		display_inverse_on = 	0xA7,	
 
-		// @brief Display off (sleep mode)
+		// @brief Driver off (sleep mode)
 		display_mode_sleep =	0xAE,
 
-		// @brief Display on in normal mode
+		// @brief Driver on in normal mode
 		display_mode_normal =  	0xAF
 		
 	};
@@ -342,7 +342,7 @@ private:
 	// @brief SSD1306 Timing & Driving Scheme Setting Commands
 	enum class tcmd
 	{
-		// @brief Set Display Clock Divide Ratio/Oscillator Frequency. [7:4] clk freq, [3:0] clk prescaler
+		// @brief Set Driver Clock Divide Ratio/Oscillator Frequency. [7:4] clk freq, [3:0] clk prescaler
 		clk_presc_freq = 		0xD5,
 		// @brief Max frequency, no prescaler
 		clk_max_setting = 		0xF0,	
@@ -397,7 +397,7 @@ protected:
 // Out-of-class definitions of member function templates 
 
 template<std::size_t FONT_SIZE>
-ErrorStatus Display::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, [[maybe_unused]] Colour bg, Colour fg, bool padding, bool update)
+ErrorStatus Driver::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, [[maybe_unused]] Colour bg, Colour fg, bool padding, bool update)
 {
     // fill(bg);
     // invalid cursor position requested
@@ -422,7 +422,7 @@ ErrorStatus Display::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, u
 }
 
 template<std::size_t FONT_SIZE>
-ErrorStatus Display::write_string(std::string &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
+ErrorStatus Driver::write_string(std::string &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
 {
     // Write until null-byte
 	for (char &c : ss)
@@ -437,7 +437,7 @@ ErrorStatus Display::write_string(std::string &ss, Font<FONT_SIZE> &font, Colour
 }
 
 template<std::size_t FONT_SIZE>
-ErrorStatus Display::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding)
+ErrorStatus Driver::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding)
 {
 
     // Check remaining space on current line

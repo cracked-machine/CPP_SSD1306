@@ -33,14 +33,14 @@ namespace ssd1306
 typedef Font<26> FontTest;
 
 // @brief Tester class inherits protected `ssd1106::Display::get_buffer()` accessor
-class ssd1306_tester : public ssd1306::Display
+class ssd1306_tester : public ssd1306::Driver
 {
 public:
     ssd1306_tester();
 
     bool get_buffer_page(uint8_t page_idx, std::vector<uint16_t> &page);
 
-    // @brief Helper function to provide protected access to ssd1306::Display::write_string()
+    // @brief Helper function to provide protected access to ssd1306::Driver::write_string()
     // @tparam FONT_SIZE 
     // @param ss 
     // @param font 
@@ -50,7 +50,7 @@ public:
     template<std::size_t FONT_SIZE> 
     char test_write_string(std::string &ss, Font<FONT_SIZE> &font, Colour colour, bool padding);
 
-    // @brief Helper function to provide protected access to ssd1306::Display::write_char()
+    // @brief Helper function to provide protected access to ssd1306::Driver::write_char()
     // @tparam FONT_SIZE 
     // @param ch 
     // @param font 

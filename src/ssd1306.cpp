@@ -31,13 +31,13 @@
 namespace ssd1306
 {
 
-Display::Display(SPI_TypeDef *spi_handle, SPIDMA dma_option) : spi_dma_setting (dma_option)
+Driver::Driver(SPI_TypeDef *spi_handle, SPIDMA dma_option) : spi_dma_setting (dma_option)
 {
     // initialise the SPI handle used in this class
     _spi_handle = std::unique_ptr<SPI_TypeDef>(spi_handle);
 }
 
-bool Display::init()
+bool Driver::init()
 {
 
     if (spi_dma_setting == SPIDMA::enabled)
@@ -151,7 +151,7 @@ bool Display::init()
 }
 
 
-void Display::fill(Colour color)
+void Driver::fill(Colour color)
 {
     for(auto &pixel : m_buffer)
     {
@@ -159,14 +159,14 @@ void Display::fill(Colour color)
     }
 }
 
-void Display::dma1_ch2_isr()
+void Driver::dma1_ch2_isr()
 {
     // prevent ISR lockup
     LL_DMA_ClearFlag_HT1(DMA1);
     LL_DMA_ClearFlag_TC1(DMA1);
 }
 
-ErrorStatus Display::update_screen()
+ErrorStatus Driver::update_screen()
 {
     // DMA doesn't require explicitly send of commands or data
     if (spi_dma_setting == SPIDMA::disabled)
@@ -195,7 +195,7 @@ ErrorStatus Display::update_screen()
     return ErrorStatus::OK;
 }
 
-bool Display::send_command(uint8_t cmd_byte [[maybe_unused]])
+bool Driver::send_command(uint8_t cmd_byte [[maybe_unused]])
 {
     // #if defined(USE_RTT)
     //     SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
@@ -222,7 +222,7 @@ bool Display::send_command(uint8_t cmd_byte [[maybe_unused]])
     return true;
 }
 
-bool Display::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
+bool Driver::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
 {
     #if defined(X86_UNIT_TESTING_ONLY)
         return true;
@@ -252,7 +252,7 @@ bool Display::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
     #endif  // defined(USE_SSD1306_HAL_DRIVER)
 } 
 
-void Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
+void Driver::draw_pixel(uint8_t x, uint8_t y, Colour color)
 {
     // Draw in the right color
     if(color == Colour::White) 
@@ -271,7 +271,7 @@ void Display::draw_pixel(uint8_t x, uint8_t y, Colour color)
     }
 }
 
-bool Display::set_cursor(uint8_t x, uint8_t y)
+bool Driver::set_cursor(uint8_t x, uint8_t y)
 { 
     if(x >= m_page_width || y >= m_height) 
     {
@@ -286,7 +286,7 @@ bool Display::set_cursor(uint8_t x, uint8_t y)
 }
 
 
-void Display::reset()
+void Driver::reset()
 {
 	// Signal the driver IC to reset the OLED display
     LL_GPIO_ResetOutputPin(m_reset_port, m_reset_pin);
@@ -299,7 +299,7 @@ void Display::reset()
 }
 
 #if defined(X86_UNIT_TESTING_ONLY) || defined(USE_RTT)
-void Display::dump_buffer(bool hex)
+void Driver::dump_buffer(bool hex)
 {
     uint16_t byte_count {0};
     for (auto& byte : m_buffer)

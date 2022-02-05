@@ -54,6 +54,12 @@ namespace ssd1306
 class DriverSerialInterface 
 {
 public:
+    // @brief Construct a new ssd1306::DriverSerialInterface object
+    // @param display_spi   The SPI peripheral e.g. SPI1
+    // @param dc_port       The data/command port e.g. GPIOA
+    // @param dc_pin        The data/command pin e.g. LL_GPIO_PIN_0
+    // @param reset_port    The reset port e.g. GPIOA
+    // @param reset_pin     The reset pin e.g. LL_GPIO_PIN_3
 	DriverSerialInterface(SPI_TypeDef *display_spi, GPIO_TypeDef* dc_port, uint16_t dc_pin, GPIO_TypeDef* reset_port, uint16_t reset_pin) 
 	: m_display_spi(display_spi), m_dc_port(dc_port), m_dc_pin(dc_pin), m_reset_port(reset_port), m_reset_pin(reset_pin)
 	{

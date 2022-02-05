@@ -96,7 +96,7 @@ public:
 	Driver(SPI_TypeDef *spi_handle, SPIDMA dma_option);
 
 	// @brief write setup commands to the IC
-	bool init();
+	bool power_on_sequence();
 
 	// @brief Write single colour to entire sw buffer
 	// @param colour 

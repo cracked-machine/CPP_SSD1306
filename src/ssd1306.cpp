@@ -37,7 +37,7 @@ Driver::Driver(SPI_TypeDef *spi_handle, SPIDMA dma_option) : spi_dma_setting (dm
     _spi_handle = std::unique_ptr<SPI_TypeDef>(spi_handle);
 }
 
-bool Driver::init()
+bool Driver::power_on_sequence()
 {
 
     if (spi_dma_setting == SPIDMA::enabled)

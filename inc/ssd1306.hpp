@@ -150,10 +150,10 @@ protected:
 
 private:
 
-	#if not defined(X86_UNIT_TESTING_ONLY)
-		// object containing SPI port/pins and pointer to CMSIS defined SPI peripheral
-		DriverSerialInterface m_serial_interface;
-	#endif
+
+	// object containing SPI port/pins and pointer to CMSIS defined SPI peripheral
+	DriverSerialInterface m_serial_interface;
+
 
 	// @brief callback handler for DMA interrupts
 	struct DmaIntHandler : public stm32::isr::STM32G0InterruptManager

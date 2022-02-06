@@ -37,6 +37,7 @@
 
 #if defined(X86_UNIT_TESTING_ONLY)
 	// only used when unit testing on x86
+	#include <mock_cmsis.hpp>
 	#include <iostream>
 #else
 	#pragma GCC diagnostic push

@@ -44,7 +44,7 @@ bool Driver::power_on_sequence()
         m_dma_int_handler.register_driver(this);
     }
 
-
+#if not defined(X86_UNIT_TESTING_ONLY)
     LL_SPI_Enable(m_serial_interface.get_spi_handle());
     if (!LL_SPI_IsEnabled(m_serial_interface.get_spi_handle()))
     {
@@ -56,7 +56,7 @@ bool Driver::power_on_sequence()
 
     // Now wait for the screen to boot
     LL_mDelay(10);
-
+#endif
 
     // put into sleep mode during setup, probably not needed
     if (!send_command( static_cast<uint8_t>(fcmd::display_mode_sleep) )) { return false; } 
@@ -119,6 +119,7 @@ bool Driver::power_on_sequence()
 
     if (spi_dma_setting == SPIDMA::enabled)
     {
+#if not defined(X86_UNIT_TESTING_ONLY)
         // no more commands to send so set data mode/high signal
         LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());
 
@@ -131,7 +132,7 @@ bool Driver::power_on_sequence()
         // generate DMA request whenever the TX buffer is empty
         LL_SPI_EnableDMAReq_TX(m_serial_interface.get_spi_handle());
         LL_SPI_Enable(m_serial_interface.get_spi_handle());
-    
+#endif
     }
 
     // Flush buffer to screen
@@ -159,9 +160,11 @@ void Driver::fill(Colour color)
 
 void Driver::dma1_ch2_isr()
 {
+#if not defined(X86_UNIT_TESTING_ONLY)
     // prevent ISR lockup
     LL_DMA_ClearFlag_HT1(DMA1);
     LL_DMA_ClearFlag_TC1(DMA1);
+#endif
 }
 
 ErrorStatus Driver::update_screen()
@@ -213,10 +216,11 @@ bool Driver::send_command(uint8_t cmd_byte [[maybe_unused]])
         #endif
         
     }  
+#if not defined(X86_UNIT_TESTING_ONLY)
     // set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
     LL_GPIO_ResetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());      
     LL_SPI_TransmitData8(m_serial_interface.get_spi_handle(), cmd_byte);    
-    
+#endif    
     return true;
 }
 
@@ -286,12 +290,13 @@ bool Driver::set_cursor(uint8_t x, uint8_t y)
 
 void Driver::reset()
 {
+#if not defined(X86_UNIT_TESTING_ONLY)
 	// Signal the driver IC to reset the OLED display
     LL_GPIO_ResetOutputPin(m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
     LL_mDelay(10);
     LL_GPIO_SetOutputPin(m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
     LL_mDelay(10);
-
+#endif
     // reset the sw buffer 
     m_buffer.fill(0);
 }

@@ -31,7 +31,8 @@
 namespace ssd1306
 {
 
-Driver::Driver(DriverSerialInterface &display_spi_interface, SPIDMA dma_option) : spi_dma_setting (dma_option), m_serial_interface(display_spi_interface)
+Driver::Driver(DriverSerialInterface &display_spi_interface, SPIDMA dma_option) 
+: spi_dma_setting (dma_option), m_serial_interface(display_spi_interface)
 {
 }
 

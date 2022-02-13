@@ -26,7 +26,7 @@
 #include "ssd1306.hpp"
 #include <iomanip>
 #include <cstring>
-#include <ll_spi_utils.hpp>
+#include <spi_utils.hpp>
 
 namespace ssd1306
 {
@@ -203,14 +203,14 @@ bool Driver::send_command(uint8_t cmd_byte [[maybe_unused]])
     //     SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
     // #endif  
 
-    if (!stm32::spi::ll_wait_for_txe_flag(m_serial_interface.get_spi_handle()))
+    if (!stm32::spi::wait_for_txe_flag(m_serial_interface.get_spi_handle()))
     {
         #if defined(USE_RTT) 
             SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
         #endif
         
     }
-    if (!stm32::spi::ll_wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
+    if (!stm32::spi::wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
     {
         #if defined(USE_RTT) 
             SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
@@ -233,14 +233,14 @@ bool Driver::send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
         // transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
         for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
         {
-            if (!stm32::spi::ll_wait_for_txe_flag(m_serial_interface.get_spi_handle()))
+            if (!stm32::spi::wait_for_txe_flag(m_serial_interface.get_spi_handle()))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
                 #endif
                 
             }
-            if (!stm32::spi::ll_wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
+            if (!stm32::spi::wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
             {
                 #if defined(USE_RTT) 
                     SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 

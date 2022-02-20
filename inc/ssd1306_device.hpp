@@ -26,11 +26,8 @@
 #ifndef __SSD1306_DEVICE_HPP__
 #define __SSD1306_DEVICE_HPP__
 
-#include <font.hpp>
-#include <array>
-#include <string>
-#include <memory>
-#include <stm32g0_interrupt_manager.hpp>
+#include <ssd1306_common.hpp>
+
 
 // disable dynamic allocation/copying
 #include <allocation_restricted_base.hpp>
@@ -46,12 +43,14 @@
 		#include "spi.h"	
 	#pragma GCC diagnostic pop
     #include <bitset_utils.hpp>
+	#include <spi_utils.hpp>
 #endif
 
 namespace ssd1306 
 {
 
 // @brief contains pointer to SPI peripheral and associated GPIO ports/pins (as defined in CMSIS)
+template<typename DEVICE_ISR_ENUM>
 class DriverSerialInterface 
 {
 public:
@@ -61,8 +60,8 @@ public:
     // @param dc_pin        The data/command pin e.g. LL_GPIO_PIN_0
     // @param reset_port    The reset port e.g. GPIOA
     // @param reset_pin     The reset pin e.g. LL_GPIO_PIN_3
-	DriverSerialInterface(SPI_TypeDef *display_spi, GPIO_TypeDef* dc_port, uint16_t dc_pin, GPIO_TypeDef* reset_port, uint16_t reset_pin) 
-	: m_display_spi(display_spi), m_dc_port(dc_port), m_dc_pin(dc_pin), m_reset_port(reset_port), m_reset_pin(reset_pin)
+	DriverSerialInterface(SPI_TypeDef *display_spi, GPIO_TypeDef* dc_port, uint16_t dc_pin, GPIO_TypeDef* reset_port, uint16_t reset_pin, DEVICE_ISR_ENUM dma_isr_type) 
+	: m_display_spi(display_spi), m_dc_port(dc_port), m_dc_pin(dc_pin), m_reset_port(reset_port), m_reset_pin(reset_pin), m_dma_isr_type(dma_isr_type)
 	{
 	}
 	SPI_TypeDef * get_spi_handle() { return m_display_spi; }
@@ -70,6 +69,7 @@ public:
 	uint16_t get_dc_pin() { return m_dc_pin; }
 	GPIO_TypeDef* get_reset_port() { return m_reset_port; }
 	uint16_t get_reset_pin() { return m_reset_pin; }
+	DEVICE_ISR_ENUM get_dma_isr_type() { return m_dma_isr_type; }
 private:
 	// @brief The SPI peripheral
 	SPI_TypeDef *m_display_spi;
@@ -81,6 +81,8 @@ private:
 	GPIO_TypeDef* m_reset_port;
 	// @brief The reset GPIO pin
 	uint16_t m_reset_pin;
+
+	DEVICE_ISR_ENUM m_dma_isr_type;
 };
 
 

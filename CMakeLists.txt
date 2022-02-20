@@ -7,6 +7,7 @@ target_sources(${BUILD_NAME} PRIVATE
     src/font11x18.cpp
     src/font16x26.cpp
     src/ssd1306.cpp
+    src/ssd1306_common.cpp
 
 )
 

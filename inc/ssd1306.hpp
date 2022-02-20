@@ -28,41 +28,14 @@
 
 #include <ssd1306_device.hpp>
 
+
 namespace ssd1306
 {
 
-// @brief colour range of the OLED(!)
-enum class Colour: uint16_t
-{
-    Black = 0x00, 
-    White = 0x01  
-};
-
-// @brief SSD1306 error status
-enum class ErrorStatus {
-	// @brief operation successful
-	OK,
-	// @brief write overflowed SSD1306 display width/height
-	LINE_OVRFLW,
-	// @brief provided pixel index is out of bounds
-	PIXEL_OOB,
-	// @brief cursor falls outside of display area
-	CURSOR_OOB,
-	// @brief error sending Page position command to SSD1306
-	START_PAGE_ERR,
-	// @brief error sending low column value command to SSD1306
-	START_LCOL_ERR,
-	// @brief error sending high column value command to SSD1306
-	START_HCOL_ERR,
-	// @brief error sending buffer data command to SSD1306
-	SEND_DATA_ERR,
-	// @brief bad things happened here
-	UNKNOWN_ERR
-};
-
 
 // @brief 
-class Driver : public AllocationRestrictedBase
+template<typename DEVICE_ISR_ENUM>
+class Driver : public AllocationRestrictedBase, public CommonFunctions
 {
 public:
 	enum class SPIDMA
@@ -74,14 +47,128 @@ public:
 	// @brief Stored setting for enabling/disabling DMA
 	SPIDMA spi_dma_setting {SPIDMA::disabled};
 
-	Driver(DriverSerialInterface &display_spi_interface, SPIDMA dma_option);
+	
+	Driver(DriverSerialInterface<DEVICE_ISR_ENUM> &display_spi_interface, SPIDMA dma_option) 
+	: spi_dma_setting (dma_option), m_serial_interface(display_spi_interface)
+	{
+	}
 
 	// @brief write setup commands to the IC
-	bool power_on_sequence();
+	bool power_on_sequence()
+	{
 
-	// @brief Write single colour to entire sw buffer
-	// @param colour 
-	void fill(Colour colour);
+		if (spi_dma_setting == SPIDMA::enabled)
+		{
+			// register the interrupt with InterruptManagerStm32g0
+			m_dma_int_handler.register_driver(this);
+		}
+
+		#if not defined(X86_UNIT_TESTING_ONLY)
+			LL_SPI_Enable(m_serial_interface.get_spi_handle());
+			if (!LL_SPI_IsEnabled(m_serial_interface.get_spi_handle()))
+			{
+				return false;
+			}
+
+
+			reset();
+
+			// Now wait for the screen to boot
+			LL_mDelay(10);
+		#endif
+
+		// put into sleep mode during setup, probably not needed
+		if (!send_command( static_cast<uint8_t>(fcmd::display_mode_sleep) )) { return false; } 
+
+		// set fundamental commands
+		if (!send_command( static_cast<uint8_t>(fcmd::display_use_ram) )) { return false; }
+		if (!send_command( static_cast<uint8_t>(fcmd::display_inverse_off) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(fcmd::set_display_constrast) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(fcmd::max_constrast) )) { return false; } 
+		
+		
+		if (spi_dma_setting == SPIDMA::enabled)
+		{
+			// set page addressing mode
+			if (!send_command( static_cast<uint8_t>(acmd::set_memory_mode) )) { return false; } 
+			if (!send_command( static_cast<uint8_t>(acmd::horiz_addr_mode) )) { return false; }
+			
+			if (!send_command( static_cast<uint8_t>(acmd::set_column_address) )) { return false; }
+			if (!send_command( static_cast<uint8_t>(0x00) )) { return false; } 
+			if (!send_command( static_cast<uint8_t>(0x7F) )) { return false; } 
+
+			if (!send_command( static_cast<uint8_t>(acmd::set_page_address) )) { return false; }
+			if (!send_command( static_cast<uint8_t>(0x00) )) { return false; } 
+			if (!send_command( static_cast<uint8_t>(0x07) )) { return false; } 
+		}
+		else
+		{
+			// set horizontal addressing mode - can be used with DMA because commands arenot required before every buffer update
+			if (!send_command( static_cast<uint8_t>(acmd::set_memory_mode) )) { return false; } 
+			if (!send_command( static_cast<uint8_t>(acmd::page_addr_mode) )) { return false; }
+			if (!send_command( static_cast<uint8_t>(acmd::start_page_0) )) { return false; } 
+			if (!send_command( static_cast<uint8_t>(acmd::start_lcol_0) )) { return false; } 
+			if (!send_command( static_cast<uint8_t>(acmd::start_hcol_0) )) { return false; } 
+		}
+
+		// set hardware config commands
+		if (!send_command( static_cast<uint8_t>(hwcmd::start_line_0) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(hwcmd::vert_flip_normal) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(hwcmd::horiz_flip_normal) )) { return false; }     
+		if (!send_command( static_cast<uint8_t>(hwcmd::set_mux_ratio) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(hwcmd::default_mux_ratio) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(hwcmd::set_vert_offset) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(hwcmd::vert_offset_none) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(hwcmd::set_com_pin_cfg) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(hwcmd::com_pin_alt_remap_off) )) { return false; }
+		
+		// set timing/driving commands
+		if (!send_command( static_cast<uint8_t>(tcmd::clk_presc_freq) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(tcmd::clk_max_setting) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(tcmd::set_precharge_period) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(tcmd::default_precharge) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(tcmd::set_vcomh_lvl) )) { return false; } 
+		if (!send_command( static_cast<uint8_t>(tcmd::vcomh_vcc_077) )) { return false; } 
+
+		// wake up display
+		if (!send_command( static_cast<uint8_t>(fcmd::display_mode_normal) )) { return false; } 
+
+		// Clear screen
+		fill(Colour::Black);
+
+		if (spi_dma_setting == SPIDMA::enabled)
+		{
+		#if not defined(X86_UNIT_TESTING_ONLY)
+				// no more commands to send so set data mode/high signal
+				LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());
+
+				LL_SPI_Disable(m_serial_interface.get_spi_handle());
+				LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.size());
+				LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.data());
+				LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)&SPI1->DR);
+				LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
+				LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+				// generate DMA request whenever the TX buffer is empty
+				LL_SPI_EnableDMAReq_TX(m_serial_interface.get_spi_handle());
+				LL_SPI_Enable(m_serial_interface.get_spi_handle());
+		#endif
+		}
+
+		// Flush buffer to screen
+		ErrorStatus res = update_screen();
+		if (res != ErrorStatus::OK)
+		{
+			return false;
+		}
+
+		// Set default values for screen object
+		m_currentx = 0;
+		m_currenty = 0;
+
+		return true;
+	}	
+
+
 
 	// @brief Convenience function to write msg to the display.
 	// @tparam FONT_SIZE The size of the font data, Uses template argument deduction.
@@ -98,17 +185,17 @@ public:
 	ErrorStatus write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
 
 
-	// @brief Get the display width. Can be used to create a std::array
-	// @return constexpr uint16_t 
-	static constexpr uint16_t get_display_width() { return m_page_width; }
 
-	// @brief Get the display height. Can be used to create a std::array
-	// @return constexpr uint16_t 
-	static constexpr uint16_t get_display_height() { return m_height; }
-
-	// @brief callback function for STM32G0InterruptManager 
+	// @brief callback function for InterruptManagerStm32g0 
 	// see stm32_interrupt_managers/inc/stm32g0_interrupt_manager_functional.hpp
-	void dma1_ch2_isr();
+	void dma_isr()
+	{
+		#if not defined(X86_UNIT_TESTING_ONLY)
+			// prevent ISR lockup
+			LL_DMA_ClearFlag_HT1(DMA1);
+			LL_DMA_ClearFlag_TC1(DMA1);
+		#endif
+	}	
 
 #if defined(X86_UNIT_TESTING_ONLY) || defined(USE_RTT)
 	// @brief Debug function to display entire SW bufefr to console (uses RTT on arm, uses std::cout on x86) 
@@ -116,99 +203,11 @@ public:
 	void dump_buffer(bool hex);
 #endif
 
-protected:
-
-	// @brief The display width in bytes. Also the size of each GDDRAM page
-    static const uint16_t m_page_width {128};
-
-	// @brief The display height, in bytes. Also the number of pages (8) multiplied by the bits per page column (8)
-    static const uint16_t m_height {64};
-
-	// @brief byte buffer for ssd1306. Access to derived classes like ssd1306_tester is permitted.
-    std::array<uint8_t, (m_page_width*m_height)/8> m_buffer;
-
-	// @brief 
-	// @tparam FONT_SIZE 
-	// @param ss 
-	// @param font 
-	// @param colour 
-	// @param padding 
-	// @return ErrorStatus 
-	template<std::size_t FONT_SIZE> 
-	ErrorStatus write_string(std::string &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);
-
-	// @brief 
-	// @tparam FONT_SIZE 
-	// @param ch 
-	// @param font 
-	// @param colour 
-	// @param padding 
-	// @return ErrorStatus 
-	template<std::size_t FONT_SIZE> 
-	ErrorStatus write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
-
-
 private:
 
 
 	// object containing SPI port/pins and pointer to CMSIS defined SPI peripheral
-	DriverSerialInterface m_serial_interface;
-
-
-	// @brief callback handler for DMA interrupts
-	struct DmaIntHandler : public stm32::isr::STM32G0InterruptManager
-	{
-		// @brief the parent driver class
-		Driver *m_parent_driver_ptr;
-		// @brief initialise and register this handler instance with STM32G0InterruptManager
-		// @param parent_driver_ptr the instance to register
-		void register_driver(Driver *parent_driver_ptr)
-		{
-			m_parent_driver_ptr = parent_driver_ptr;
-			stm32::isr::STM32G0InterruptManager::register_handler(stm32::isr::STM32G0InterruptManager::InterruptType::dma1_ch2, this);
-		}
-		// @brief The callback used by STM32G0InterruptManager
-		virtual void ISR()
-		{
-			m_parent_driver_ptr->dma1_ch2_isr();
-		}
-	};
-	// @brief handler object
-	DmaIntHandler m_dma_int_handler;
-
-
-	// @brief Reset the Driver IC and SW buffer.
-	void reset();
-
-	// @brief Write a pixel to the sw buffer at the corresponding display coordinates 
-	// @param x pos
-	// @param y pos
-	// @param colour white/black
-	void draw_pixel(uint8_t x, uint8_t y, Colour colour);
-
-	// @brief Write the sw buffer to the IC GDDRAM (Page Addressing Mode only)
-	ErrorStatus update_screen();
-
-	// @brief Set the coordinates to draw to the display
-	// @param x 
-	// @param y 
-	bool set_cursor(uint8_t x, uint8_t y);
-
-	// @brief Send one command over SPI 
-	// @param cmd_byte The byte to send
-	// @return true if success, false if error
-	bool send_command(uint8_t cmd_byte);
-	
-	// @brief send one page of the display buffer over SPI
-	// @param page_pos_gddram The index position of the page within the buffer
-	// @return true if success, false if error
-	bool send_page_data(uint16_t page_pos_gddram);
-
-	// @brief X coordinate for writing to the display
-    uint16_t m_currentx {0};
-
-	// @brief Y coordinate for writing to the display
-    uint16_t m_currenty {0};
+	DriverSerialInterface<DEVICE_ISR_ENUM> m_serial_interface;
 
 	// @brief SSD1306 Fundamental Commands - See Section 9 of datasheet for setting bytes
 	enum class fcmd
@@ -354,14 +353,146 @@ private:
 
 	};
 
+	// @brief callback handler for DMA interrupts
+	struct DmaIntHandler : public stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM>
+	{
+		// @brief the parent driver class
+		Driver *m_parent_driver_ptr;
+		// @brief initialise and register this handler instance with InterruptManagerStm32g0
+		// @param parent_driver_ptr the instance to register
+		void register_driver(Driver *parent_driver_ptr)
+		{
+			m_parent_driver_ptr = parent_driver_ptr;
+			stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM>::register_handler(m_parent_driver_ptr->m_serial_interface.get_dma_isr_type(), this);
+		}
+        // @brief Definition of InterruptManagerStm32Base::ISR. This is called by stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM> specialization 
+		virtual void ISR()
+		{
+			m_parent_driver_ptr->dma_isr();
+		}
+	};
+	// @brief handler object
+	DmaIntHandler m_dma_int_handler;
+
+
+	// @brief Reset the Driver IC and SW buffer.
+	void reset()
+	{
+	#if not defined(X86_UNIT_TESTING_ONLY)
+		// Signal the driver IC to reset the OLED display
+		LL_GPIO_ResetOutputPin(m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
+		LL_mDelay(10);
+		LL_GPIO_SetOutputPin(m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
+		LL_mDelay(10);
+	#endif
+		// reset the sw buffer 
+		m_buffer.fill(0);
+	}
+
+
+	// @brief Write the sw buffer to the IC GDDRAM (Page Addressing Mode only)
+	ErrorStatus update_screen()
+	{
+		// DMA doesn't require explicitly send of commands or data
+		if (spi_dma_setting == SPIDMA::disabled)
+		{    
+			for(uint8_t page_idx = 0; page_idx < 8; page_idx++)
+			{
+	
+				// Set Page position to write to: 0-7
+				if (!send_command( static_cast<uint8_t>(acmd::start_page_0) + page_idx)) { return ErrorStatus::START_PAGE_ERR; }
+
+				// Set the lower start column address of pointer by command 00h~0Fh.
+				if (!send_command( static_cast<uint8_t>(acmd::start_lcol_0) )) { return ErrorStatus::START_LCOL_ERR; }
+
+				// Set the upper start column address of pointer by command 10h~1Fh
+				if (!send_command( static_cast<uint8_t>(acmd::start_hcol_0) )) { return ErrorStatus::START_HCOL_ERR; }
+
+				// the next page position within the GDDRAM buffer
+				uint16_t page_pos_gddram {static_cast<uint16_t>( m_page_width * page_idx )};
+
+				if (!send_page_data(page_pos_gddram)) { return ErrorStatus::SEND_DATA_ERR; }            
+			}
+
+			//dump_buffer(true);
+		}
+			
+		return ErrorStatus::OK;
+	}	
+
+
+
+	// @brief Send one command over SPI 
+	// @param cmd_byte The byte to send
+	// @return true if success, false if error
+	bool send_command(uint8_t cmd_byte)
+	{
+		// #if defined(USE_RTT)
+		//     SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
+		// #endif  
+
+		if (!stm32::spi::wait_for_txe_flag(m_serial_interface.get_spi_handle()))
+		{
+			#if defined(USE_RTT) 
+				SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
+			#endif
+			
+		}
+		if (!stm32::spi::wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
+		{
+			#if defined(USE_RTT) 
+				SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
+			#endif
+			
+		}  
+	#if not defined(X86_UNIT_TESTING_ONLY)
+		// set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
+		LL_GPIO_ResetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());      
+		LL_SPI_TransmitData8(m_serial_interface.get_spi_handle(), cmd_byte);    
+	#endif    
+		return true;
+	}
+	
+	// @brief send one page of the display buffer over SPI
+	// @param page_pos_gddram The index position of the page within the buffer
+	// @return true if success, false if error
+	bool send_page_data(uint16_t page_pos_gddram)
+	{
+		#if defined(X86_UNIT_TESTING_ONLY)
+			return true;
+		#else
+			// transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
+			for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
+			{
+				if (!stm32::spi::wait_for_txe_flag(m_serial_interface.get_spi_handle()))
+				{
+					#if defined(USE_RTT) 
+						SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
+					#endif
+					
+				}
+				if (!stm32::spi::wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
+				{
+					#if defined(USE_RTT) 
+						SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 
+					#endif
+					
+				}                          
+				LL_SPI_TransmitData8(m_serial_interface.get_spi_handle(), m_buffer[idx]);
+				// set data mode/high signal after we put data into TXFIFO to avoid premature latching
+				LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());         
+			}
+			return true;
+		#endif  // defined(USE_SSD1306_HAL_DRIVER)
+	} 
+
 };
 
 // Out-of-class definitions of member function templates 
-
+template<typename DEVICE_ISR_ENUM>
 template<std::size_t FONT_SIZE>
-ErrorStatus Driver::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, [[maybe_unused]] Colour bg, Colour fg, bool padding, bool update)
+ErrorStatus Driver<DEVICE_ISR_ENUM>::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, [[maybe_unused]] Colour bg, Colour fg, bool padding, bool update)
 {
-    // fill(bg);
     // invalid cursor position requested
 	if (!set_cursor(x, y))
 	{
@@ -383,100 +514,7 @@ ErrorStatus Driver::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, ui
 	return ErrorStatus::OK;
 }
 
-template<std::size_t FONT_SIZE>
-ErrorStatus Driver::write_string(std::string &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
-{
-    // Write until null-byte
-	for (char &c : ss)
-	{
-		ErrorStatus res = write_char(c, font, color, padding);
-		if (res != ErrorStatus::OK)
-		{
-			return res;
-		}
-	}
-    return ErrorStatus::OK;
-}
 
-template<std::size_t FONT_SIZE>
-ErrorStatus Driver::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding)
-{
-
-    // Check remaining space on current line
-    if (m_page_width <= (m_currentx + font.height()) ||
-        m_page_width <= (m_currenty + font.height()))
-    {
-        // Not enough space on current line
-        return ErrorStatus::OK;
-    }
-
-    // add extra leading horizontal space
-    if (padding)
-    {
-    	for(size_t n = 0; n < font.height(); n++)
-		{
-			draw_pixel(m_currentx, (m_currenty + n), Colour::Black);
-		}
-    	m_currentx += 1;
-    }
-
-    // Use the font to write
-    uint32_t font_data_word;
-    for(size_t font_height_idx = 0; font_height_idx < font.height(); font_height_idx++) 
-	{
-        if (!font.get_pixel( (ch - 32) * font.height() + font_height_idx, font_data_word )) { return ErrorStatus::PIXEL_OOB; }
-
-		#ifdef ENABLE_SSD1306_TEST_STDOUT
-				// separator for the font
-				std::cout << std::endl;
-		#endif
-
-		// get each bit/pixel in the font_data_word and write it to the display output buffer
-        for(size_t font_width_idx = 0; font_width_idx < font.width(); font_width_idx++) 
-		{
-			// shift left and check if MSB is set: write as foreground pixel
-            if((font_data_word << font_width_idx) & 0x8000)
-            {
-            	switch (colour)
-				{
-					case Colour::White:
-						draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White);
-						break;
-					
-					case Colour::Black:
-						draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black);
-						break;
-				}			
-            }
-			// MSB is not set: write as background pixel
-            else
-            {
-            	switch (colour)
-				{
-					case Colour::White:
-						draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::Black);
-						break;
-					
-					case Colour::Black:
-						draw_pixel(m_currentx + font_width_idx, m_currenty + font_height_idx, Colour::White);
-						break;
-				}						
-            }
-        }
-    }
-
-    // The current space is now taken
-    m_currentx += font.width();
-
-    // add extra leading horizontal space
-    if (padding)
-	{
-    	m_currentx += 1;
-	}
-
-    // Return written char for validation
-    return ErrorStatus::OK;
-}
 
 
 

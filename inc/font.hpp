@@ -23,7 +23,7 @@
 #ifndef __FONT_HPP__
 #define __FONT_HPP__
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
 
 namespace ssd1306

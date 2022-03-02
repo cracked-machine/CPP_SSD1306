@@ -24,7 +24,6 @@
 #define __SSD1306_COMMON_HPP__
 
 #include <font.hpp>
-#include <array>
 #include <string>
 #include <memory>
 #include <isr_manager_stm32g0.hpp>
@@ -36,8 +35,11 @@
 #else
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wvolatile"
-		#include "main.h"
+		#include <stm32g0xx_ll_dma.h>
+		#include <stm32g0xx_ll_utils.h>
+		#include <stm32g0xx_ll_gpio.h>
 	#pragma GCC diagnostic pop
+    #include <bitset_utils.hpp>
     #include <spi_utils.hpp>    
 #endif
 

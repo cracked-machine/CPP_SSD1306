@@ -30,7 +30,7 @@
 
 
 // disable dynamic allocation/copying
-#include <allocation_restricted_base.hpp>
+#include <restricted_base.hpp>
 
 
 

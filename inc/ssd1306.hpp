@@ -35,7 +35,7 @@ namespace ssd1306
 
 // @brief 
 template<typename DEVICE_ISR_ENUM>
-class Driver : public AllocationRestrictedBase, public CommonFunctions
+class Driver : public RestrictedBase, public CommonFunctions
 {
 public:
 	enum class SPIDMA

@@ -48,8 +48,16 @@ public:
     // @param dc_pin        The data/command pin e.g. LL_GPIO_PIN_0
     // @param reset_port    The reset port e.g. GPIOA
     // @param reset_pin     The reset pin e.g. LL_GPIO_PIN_3
-	DriverSerialInterface(SPI_TypeDef *display_spi, GPIO_TypeDef* dc_port, uint16_t dc_pin, GPIO_TypeDef* reset_port, uint16_t reset_pin, DEVICE_ISR_ENUM dma_isr_type) 
-	: m_display_spi(display_spi), m_dc_port(dc_port), m_dc_pin(dc_pin), m_reset_port(reset_port), m_reset_pin(reset_pin), m_dma_isr_type(dma_isr_type)
+	DriverSerialInterface(
+		SPI_TypeDef *display_spi, 
+		std::pair<GPIO_TypeDef*, uint16_t> dc_gpio,
+		std::pair<GPIO_TypeDef*, uint16_t> reset_gpio, 
+		DEVICE_ISR_ENUM dma_isr_type) 
+	: 
+	m_display_spi(display_spi), 
+	m_dc_port(dc_gpio.first), m_dc_pin(dc_gpio.second), 
+	m_reset_port(reset_gpio.first), m_reset_pin(reset_gpio.second), 
+	m_dma_isr_type(dma_isr_type)
 	{
 	}
 	SPI_TypeDef * get_spi_handle() { return m_display_spi; }

@@ -27,7 +27,7 @@
 #define __SSD1306_HPP_
 
 #include <ssd1306_device.hpp>
-
+#include <cstring>
 
 namespace ssd1306
 {
@@ -64,12 +64,7 @@ public:
 		}
 
 		#if not defined(X86_UNIT_TESTING_ONLY)
-			LL_SPI_Enable(m_serial_interface.get_spi_handle());
-			if (!LL_SPI_IsEnabled(m_serial_interface.get_spi_handle()))
-			{
-				return false;
-			}
-
+			stm32::spi::enable_spi(m_serial_interface.get_spi_handle());
 
 			reset();
 
@@ -142,15 +137,17 @@ public:
 				// no more commands to send so set data mode/high signal
 				LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());
 
-				LL_SPI_Disable(m_serial_interface.get_spi_handle());
+				// setup the SPI DMA
+				stm32::spi::enable_spi(m_serial_interface.get_spi_handle(), false);
+				
 				LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.size());
 				LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.data());
 				LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)&SPI1->DR);
 				LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
 				LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
-				// generate DMA request whenever the TX buffer is empty
-				LL_SPI_EnableDMAReq_TX(m_serial_interface.get_spi_handle());
-				LL_SPI_Enable(m_serial_interface.get_spi_handle());
+
+				m_serial_interface.get_spi_handle()->CR2 = m_serial_interface.get_spi_handle()->CR2 | SPI_CR2_TXDMAEN;
+				stm32::spi::enable_spi(m_serial_interface.get_spi_handle());
 		#endif
 		}
 
@@ -445,11 +442,13 @@ private:
 			#endif
 			
 		}  
-	#if not defined(X86_UNIT_TESTING_ONLY)
-		// set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
-		LL_GPIO_ResetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());      
-		LL_SPI_TransmitData8(m_serial_interface.get_spi_handle(), cmd_byte);    
-	#endif    
+		#if not defined(X86_UNIT_TESTING_ONLY)
+			// set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
+			LL_GPIO_ResetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin()); 
+
+			// send the command over SPI bus
+			stm32::spi::transmit_byte(m_serial_interface.get_spi_handle(), cmd_byte);
+		#endif    
 		return true;
 	}
 	
@@ -478,7 +477,9 @@ private:
 					#endif
 					
 				}                          
-				LL_SPI_TransmitData8(m_serial_interface.get_spi_handle(), m_buffer[idx]);
+				// send the page over SPI bus
+				stm32::spi::transmit_byte(m_serial_interface.get_spi_handle(), m_buffer[idx]);
+				
 				// set data mode/high signal after we put data into TXFIFO to avoid premature latching
 				LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());         
 			}

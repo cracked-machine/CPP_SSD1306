@@ -447,7 +447,7 @@ private:
 			LL_GPIO_ResetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin()); 
 
 			// send the command over SPI bus
-			stm32::spi::transmit_byte(m_serial_interface.get_spi_handle(), cmd_byte);
+			stm32::spi::send_byte(m_serial_interface.get_spi_handle(), cmd_byte);
 		#endif    
 		return true;
 	}
@@ -478,7 +478,7 @@ private:
 					
 				}                          
 				// send the page over SPI bus
-				stm32::spi::transmit_byte(m_serial_interface.get_spi_handle(), m_buffer[idx]);
+				stm32::spi::send_byte(m_serial_interface.get_spi_handle(), m_buffer[idx]);
 				
 				// set data mode/high signal after we put data into TXFIFO to avoid premature latching
 				LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());         

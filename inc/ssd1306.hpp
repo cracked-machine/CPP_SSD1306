@@ -181,6 +181,9 @@ public:
 	template<std::size_t FONT_SIZE> 
 	ErrorStatus write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
 
+	template<std::size_t FONT_SIZE, std::size_t MSG_SIZE>
+	ErrorStatus write(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
+
 
 
 	// @brief callback function for InterruptManagerStm32g0 
@@ -515,6 +518,38 @@ ErrorStatus Driver<DEVICE_ISR_ENUM>::write(std::string &msg, Font<FONT_SIZE> &fo
 	return ErrorStatus::OK;
 }
 
+template<typename DEVICE_ISR_ENUM>
+template<std::size_t FONT_SIZE, std::size_t MSG_SIZE> 
+ErrorStatus Driver<DEVICE_ISR_ENUM>::write(
+	noarch::containers::StaticString<MSG_SIZE> &msg, 
+	Font<FONT_SIZE> &font, 
+	uint8_t x, 
+	uint8_t y, 
+	Colour bg [[maybe_unused]], 
+	Colour fg, 
+	bool padding, 
+	bool update)
+{
+    // invalid cursor position requested
+	if (!set_cursor(x, y))
+	{
+		return ErrorStatus::CURSOR_OOB;
+	}
+
+	ErrorStatus write_res = write_string(msg, font, fg, padding);
+	if (write_res != ErrorStatus::OK)
+	{
+		return write_res;
+	}
+    
+	// if update was selected then we can just return the result now
+	if (update)
+    {
+		return update_screen();
+    }
+    
+	return ErrorStatus::OK;
+}
 
 
 

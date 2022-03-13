@@ -27,6 +27,7 @@
 #include <string>
 #include <memory>
 #include <isr_manager_stm32g0.hpp>
+#include <static_string.hpp>
 
 #if defined(X86_UNIT_TESTING_ONLY)
 	// only used when unit testing on x86
@@ -132,6 +133,9 @@ protected:
 	template<std::size_t FONT_SIZE>
 	ErrorStatus write_string(std::string &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);
 
+	template<std::size_t FONT_SIZE, std::size_t MSG_SIZE>
+	ErrorStatus write_string(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);	
+
 	// @brief 
 	// @tparam FONT_SIZE 
 	// @param ch 
@@ -145,12 +149,27 @@ protected:
 };
 
 template<std::size_t FONT_SIZE>
-ErrorStatus CommonFunctions::write_string(std::string &ss, Font<FONT_SIZE> &font, Colour color, bool padding)
+ErrorStatus CommonFunctions::write_string(std::string &msg, Font<FONT_SIZE> &font, Colour color, bool padding)
 {
     // Write until null-byte
-	for (char &c : ss)
+	for (char &c : msg)
 	{
 		ErrorStatus res = write_char(c, font, color, padding);
+		if (res != ErrorStatus::OK)
+		{
+			return res;
+		}
+	}
+    return ErrorStatus::OK;
+}
+
+template<std::size_t FONT_SIZE, std::size_t MSG_SIZE>
+ErrorStatus CommonFunctions::write_string(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, Colour colour, bool padding)
+{
+    // Write until null-byte
+	for (char &c : msg.array())
+	{
+		ErrorStatus res = write_char(c, font, colour, padding);
 		if (res != ErrorStatus::OK)
 		{
 			return res;

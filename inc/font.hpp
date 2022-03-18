@@ -94,12 +94,12 @@ private:
 
 };
 
-// specializations
-typedef Font<5 * char_map_size> Font5x5;
-typedef Font<7 * char_map_size> Font5x7;
-typedef Font<10 * char_map_size> Font7x10;
-typedef Font<18 * char_map_size> Font11x18;
-typedef Font<26 * char_map_size> Font16x26;
+// the template class object sizes only contribute to your program size if they are used; otherwise they are not linked
+using Font5x5 	= 	Font<5 * char_map_size>;		// 15408 bytes
+using Font5x7 	= 	Font<7 * char_map_size>;		// 15788 bytes
+using Font7x10 	= 	Font<10 * char_map_size>;		// 16364 bytes
+using Font11x18 = 	Font<18 * char_map_size>;		// 17936 bytes
+using Font16x26 = 	Font<26 * char_map_size>;		// 19456 bytes
 
 } // namespace ssd1306
 

@@ -25,6 +25,8 @@
 namespace ssd1306
 {
 
+#ifdef USE_FONT_5X5
+
 // Font5x5 is declared in font.hpp
 
 // 5x5 - '1'
@@ -142,4 +144,6 @@ template<> std::array<uint16_t, Font5x5::m_height * char_map_size> Font5x5::data
     0x0000, 0x5000, 0x2800, 0x0000, 0x7000,  // ~
 };
 
-}
+#endif // USE_FONT_5X5
+
+} // namespace ssd1306

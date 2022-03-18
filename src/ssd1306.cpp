@@ -24,7 +24,7 @@
 // https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf
 
 #include "ssd1306.hpp"
-#include <iomanip>
+
 #include <cstring>
 
 

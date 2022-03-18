@@ -23,9 +23,12 @@
 #ifndef __SSD1306_COMMON_HPP__
 #define __SSD1306_COMMON_HPP__
 
+
 #include <font.hpp>
-#include <string>
-#include <memory>
+// #define USE_STD_STRING
+// #ifdef USE_STD_STRING
+// #include <string>
+// #endif
 #include <isr_manager_stm32g0.hpp>
 #include <static_string.hpp>
 
@@ -123,6 +126,7 @@ public:
 
 protected:
 
+#ifdef USE_STD_STRING	
 	// @brief 
 	// @tparam FONT_SIZE 
 	// @param ss 
@@ -132,9 +136,10 @@ protected:
 	// @return ErrorStatus 
 	template<std::size_t FONT_SIZE>
 	ErrorStatus write_string(std::string &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);
-
+#else
 	template<std::size_t FONT_SIZE, std::size_t MSG_SIZE>
 	ErrorStatus write_string(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);	
+#endif // #ifdef USE_STD_STRING
 
 	// @brief 
 	// @tparam FONT_SIZE 
@@ -148,6 +153,7 @@ protected:
 
 };
 
+#ifdef USE_STD_STRING
 template<std::size_t FONT_SIZE>
 ErrorStatus CommonFunctions::write_string(std::string &msg, Font<FONT_SIZE> &font, Colour color, bool padding)
 {
@@ -162,7 +168,7 @@ ErrorStatus CommonFunctions::write_string(std::string &msg, Font<FONT_SIZE> &fon
 	}
     return ErrorStatus::OK;
 }
-
+#else
 template<std::size_t FONT_SIZE, std::size_t MSG_SIZE>
 ErrorStatus CommonFunctions::write_string(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, Colour colour, bool padding)
 {
@@ -177,6 +183,7 @@ ErrorStatus CommonFunctions::write_string(noarch::containers::StaticString<MSG_S
 	}
     return ErrorStatus::OK;
 }
+#endif //#ifdef USE_STD_STRING
 
 
 template<std::size_t FONT_SIZE>

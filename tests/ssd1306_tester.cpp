@@ -23,7 +23,6 @@
 #include <ssd1306_tester.hpp>
 #include <catch2/catch_all.hpp>
 #include <array>
-#include <iomanip>
 #include <numeric>
 
 namespace ssd1306

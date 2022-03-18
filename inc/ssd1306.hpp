@@ -178,12 +178,14 @@ public:
 	// @param padding add an extra pixel to the vertical edge of the character
 	// @param update write the sw buffer to the IC
 	// @return ErrorStatus 
+#ifdef USE_STD_STRING	
 	template<std::size_t FONT_SIZE> 
 	ErrorStatus write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
+#else
 
 	template<std::size_t FONT_SIZE, std::size_t MSG_SIZE>
 	ErrorStatus write(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
-
+#endif // #ifdef USE_STD_STRING
 
 
 	// @brief callback function for InterruptManagerStm32g0 
@@ -493,6 +495,7 @@ private:
 };
 
 // Out-of-class definitions of member function templates 
+#ifdef USE_STD_STRING
 template<typename DEVICE_ISR_ENUM>
 template<std::size_t FONT_SIZE>
 ErrorStatus Driver<DEVICE_ISR_ENUM>::write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, [[maybe_unused]] Colour bg, Colour fg, bool padding, bool update)
@@ -517,7 +520,7 @@ ErrorStatus Driver<DEVICE_ISR_ENUM>::write(std::string &msg, Font<FONT_SIZE> &fo
     
 	return ErrorStatus::OK;
 }
-
+#else 
 template<typename DEVICE_ISR_ENUM>
 template<std::size_t FONT_SIZE, std::size_t MSG_SIZE> 
 ErrorStatus Driver<DEVICE_ISR_ENUM>::write(
@@ -550,7 +553,7 @@ ErrorStatus Driver<DEVICE_ISR_ENUM>::write(
     
 	return ErrorStatus::OK;
 }
-
+#endif // #ifdef USE_STD_STRING
 
 
 

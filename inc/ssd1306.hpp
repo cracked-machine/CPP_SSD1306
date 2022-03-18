@@ -48,21 +48,19 @@ public:
 	SPIDMA spi_dma_setting {SPIDMA::disabled};
 
 	
-	Driver(DriverSerialInterface<DEVICE_ISR_ENUM> &display_spi_interface, SPIDMA dma_option) 
+	Driver(const DriverSerialInterface<DEVICE_ISR_ENUM> &display_spi_interface, SPIDMA dma_option) 
 	: spi_dma_setting (dma_option), m_serial_interface(display_spi_interface)
 	{
-	}
-
-	// @brief write setup commands to the IC
-	bool power_on_sequence()
-	{
-
 		if (spi_dma_setting == SPIDMA::enabled)
 		{
 			// register the interrupt with InterruptManagerStm32g0
 			m_dma_int_handler.register_driver(this);
 		}
+	}
 
+	// @brief write setup commands to the IC
+	bool power_on_sequence()
+	{
 		#if not defined(X86_UNIT_TESTING_ONLY)
 			stm32::spi::enable_spi(m_serial_interface.get_spi_handle());
 
@@ -140,11 +138,16 @@ public:
 				// setup the SPI DMA
 				stm32::spi::enable_spi(m_serial_interface.get_spi_handle(), false);
 				
-				LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.size());
-				LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.data());
-				LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)&SPI1->DR);
-				LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-				LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+				// cppcheck-suppress cstyleCast - CMSIS limitation
+				LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.size());	
+				// cppcheck-suppress cstyleCast - CMSIS limitation	
+				LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.data());		
+				// cppcheck-suppress cstyleCast - CMSIS limitation
+				LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)&SPI1->DR);			
+				// cppcheck-suppress cstyleCast - CMSIS limitation
+				LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);										
+				// cppcheck-suppress cstyleCast - CMSIS limitation
+				LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);									
 
 				m_serial_interface.get_spi_handle()->CR2 = m_serial_interface.get_spi_handle()->CR2 | SPI_CR2_TXDMAEN;
 				stm32::spi::enable_spi(m_serial_interface.get_spi_handle());
@@ -191,11 +194,12 @@ public:
 	// @brief callback function for InterruptManagerStm32g0 
 	// see stm32_interrupt_managers/inc/stm32g0_interrupt_manager_functional.hpp
 	void dma_isr()
-	{
-		#if not defined(X86_UNIT_TESTING_ONLY)
-			// prevent ISR lockup
-			LL_DMA_ClearFlag_HT1(DMA1);
-			LL_DMA_ClearFlag_TC1(DMA1);
+	{	// prevent ISR lockup
+		#if not defined(X86_UNIT_TESTING_ONLY)	
+			// cppcheck-suppress cstyleCast - CMSIS limitation
+			LL_DMA_ClearFlag_HT1(DMA1);		
+			// cppcheck-suppress cstyleCast - CMSIS limitation
+			LL_DMA_ClearFlag_TC1(DMA1);		
 		#endif
 	}	
 

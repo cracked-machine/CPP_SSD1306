@@ -34,7 +34,6 @@
 
 #if defined(X86_UNIT_TESTING_ONLY)
 	// only used when unit testing on x86
-	#include <mock_cmsis.hpp>
 	#include <iostream>
 #else
 	#pragma GCC diagnostic push
@@ -44,9 +43,10 @@
 		#include <stm32g0xx_ll_gpio.h>
 	#pragma GCC diagnostic pop
     #include <bitset_utils.hpp>
-    #include <spi_utils.hpp>    
+       
 #endif
 
+#include <spi_utils.hpp> 
 
 namespace ssd1306
 {

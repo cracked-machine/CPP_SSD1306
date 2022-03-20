@@ -431,7 +431,7 @@ private:
 	// @brief Send one command over SPI 
 	// @param cmd_byte The byte to send
 	// @return true if success, false if error
-	bool send_command(uint8_t cmd_byte)
+	bool send_command(uint8_t cmd_byte [[maybe_unused]])
 	{
 		// #if defined(USE_RTT)
 		//     SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
@@ -464,7 +464,7 @@ private:
 	// @brief send one page of the display buffer over SPI
 	// @param page_pos_gddram The index position of the page within the buffer
 	// @return true if success, false if error
-	bool send_page_data(uint16_t page_pos_gddram)
+	bool send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
 	{
 		#if defined(X86_UNIT_TESTING_ONLY)
 			return true;

@@ -27,6 +27,7 @@
 #define __SSD1306_HPP_
 
 #include <ssd1306_device.hpp>
+#include <timer_manager.hpp>
 #include <cstring>
 
 namespace ssd1306
@@ -67,7 +68,7 @@ public:
 			reset();
 
 			// Now wait for the screen to boot
-			LL_mDelay(10);
+			stm32::delay_millisecond(10);
 		#endif
 
 		// put into sleep mode during setup, probably not needed
@@ -387,9 +388,9 @@ private:
 	#if not defined(X86_UNIT_TESTING_ONLY)
 		// Signal the driver IC to reset the OLED display
 		LL_GPIO_ResetOutputPin(m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
-		LL_mDelay(10);
+		stm32::delay_millisecond(10);
 		LL_GPIO_SetOutputPin(m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
-		LL_mDelay(10);
+		stm32::delay_millisecond(10);
 	#endif
 		// reset the sw buffer 
 		m_buffer.fill(0);

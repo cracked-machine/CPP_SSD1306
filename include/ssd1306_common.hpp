@@ -39,7 +39,6 @@
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wvolatile"
 		#include <stm32g0xx_ll_dma.h>
-		#include <stm32g0xx_ll_utils.h>
 		#include <stm32g0xx_ll_gpio.h>
 	#pragma GCC diagnostic pop
     #include <bitset_utils.hpp>

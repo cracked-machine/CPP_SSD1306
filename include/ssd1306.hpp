@@ -62,14 +62,13 @@ public:
 	// @brief write setup commands to the IC
 	bool power_on_sequence()
 	{
-		#if not defined(X86_UNIT_TESTING_ONLY)
-			stm32::spi::enable_spi(m_serial_interface.get_spi_handle());
+		stm32::spi::enable_spi(m_serial_interface.get_spi_handle());
 
-			reset();
+		reset();
 
-			// Now wait for the screen to boot
-			stm32::delay_millisecond(10);
-		#endif
+		// Now wait for the screen to boot
+		stm32::delay_millisecond(10);
+
 
 		// put into sleep mode during setup, probably not needed
 		if (!send_command( static_cast<uint8_t>(fcmd::display_mode_sleep) )) { return false; } 
@@ -467,34 +466,31 @@ private:
 	// @return true if success, false if error
 	bool send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
 	{
-		#if defined(X86_UNIT_TESTING_ONLY)
-			return true;
-		#else
-			// transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
-			for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
+	
+		// transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
+		for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
+		{
+			if (!stm32::spi::wait_for_txe_flag(m_serial_interface.get_spi_handle()))
 			{
-				if (!stm32::spi::wait_for_txe_flag(m_serial_interface.get_spi_handle()))
-				{
-					#if defined(USE_RTT) 
-						SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
-					#endif
-					
-				}
-				if (!stm32::spi::wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
-				{
-					#if defined(USE_RTT) 
-						SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 
-					#endif
-					
-				}                          
-				// send the page over SPI bus
-				stm32::spi::send_byte(m_serial_interface.get_spi_handle(), m_buffer[idx]);
+				#if defined(USE_RTT) 
+					SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full."); 
+				#endif
 				
-				// set data mode/high signal after we put data into TXFIFO to avoid premature latching
-				LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());         
 			}
-			return true;
-		#endif  // defined(USE_SSD1306_HAL_DRIVER)
+			if (!stm32::spi::wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
+			{
+				#if defined(USE_RTT) 
+					SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy."); 
+				#endif
+				
+			}                          
+			// send the page over SPI bus
+			stm32::spi::send_byte(m_serial_interface.get_spi_handle(), m_buffer[idx]);
+			
+			// set data mode/high signal after we put data into TXFIFO to avoid premature latching
+			LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());         
+		}
+		return true;
 	} 
 
 };

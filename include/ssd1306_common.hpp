@@ -33,7 +33,8 @@
 #include <static_string.hpp>
 
 #if defined(X86_UNIT_TESTING_ONLY)
-	// only used when unit testing on x86
+    // This file should contain CMSIS bit definitions
+    #include <mock_cmsis.hpp>
 	#include <iostream>
 #else
 	#pragma GCC diagnostic push

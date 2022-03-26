@@ -24,7 +24,10 @@
 #include <ssd1306.hpp>
 #include <ssd1306_tester.hpp>
 
-
+TEST_CASE("Test Fonts", "[ssd1306_fonts]")
+{
+    REQUIRE(true);
+}
 
 // TEST_CASE("Test Fonts", "[ssd1306_fonts]")
 // {

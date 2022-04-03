@@ -433,24 +433,6 @@ private:
 	// @return true if success, false if error
 	bool send_command(uint8_t cmd_byte [[maybe_unused]])
 	{
-		// #if defined(USE_RTT)
-		//     SEGGER_RTT_printf(0, "\nCommand Byte: 0x%02x", +cmd_byte);
-		// #endif  
-
-		if (!stm32::spi::wait_for_txe_flag(m_serial_interface.get_spi_handle()))
-		{
-			#if defined(USE_RTT) 
-				SEGGER_RTT_printf(0, "\nwrite_command(): Tx buffer is full"); 
-			#endif
-			
-		}
-		if (!stm32::spi::wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
-		{
-			#if defined(USE_RTT) 
-				SEGGER_RTT_printf(0, "\nwrite_command(); SPI bus is busy"); 
-			#endif
-			
-		}  
 		#if not defined(X86_UNIT_TESTING_ONLY)
 			// set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
 			LL_GPIO_ResetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin()); 

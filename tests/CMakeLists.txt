@@ -3,6 +3,8 @@ target_sources(${BUILD_NAME} PRIVATE
     font_test.cpp
     ssd1306_tester.cpp
     ${CMAKE_BINARY_DIR}/embedded_utils/src/restricted_base.cpp
+    ${CMAKE_BINARY_DIR}/embedded_utils/src/spi_utils.cpp
+    ${CMAKE_BINARY_DIR}/embedded_utils/src/timer_manager.cpp
 )
 
 target_include_directories(${BUILD_NAME} PRIVATE 

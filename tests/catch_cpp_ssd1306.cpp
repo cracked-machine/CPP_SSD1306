@@ -23,9 +23,23 @@
 #include <catch2/catch_all.hpp>
 #include <ssd1306.hpp>
 #include <ssd1306_tester.hpp>
+#include <iostream>
+#include <mock_cmsis.hpp>
 
 TEST_CASE("Test Fonts", "[ssd1306_fonts]")
 {
+
+	// SPI peripheral for SSD1306 display driver serial communication
+	ssd1306::DriverSerialInterface<STM32G0_ISR> ssd1306_spi_interface(
+		SPI1, 
+		std::make_pair(GPIOA, GPIO_BSRR_BS0), 	// PA0 - DC
+		std::make_pair(GPIOA, GPIO_BSRR_BS3), 	// PA3 - Reset
+		STM32G0_ISR::dma1_ch2);
+
+    ssd1306::Driver<STM32G0_ISR> d{ssd1306_spi_interface, ssd1306::Driver<STM32G0_ISR>::SPIDMA::enabled};
+    ssd1306::Font5x7 f5x7;
+    std::cout << sizeof(f5x7);
+    noarch::containers::StaticString<20> m_display_line1;
     REQUIRE(true);
 }
 

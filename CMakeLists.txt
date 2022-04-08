@@ -6,11 +6,18 @@ project(SSD1306_TEST_SUITE VERSION 0.1 DESCRIPTION "SSD1306_TEST_SUITE")
 # if this is the main project then configure the build for test_suite only
 if(CMAKE_PROJECT_NAME STREQUAL SSD1306_TEST_SUITE)
 
+    # generate the header file to define USED_API macro for unit test only
+    set(USED_API "__attribute__((__used__))")
+    configure_file(cmake/gnuc_ext_defs.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/gnuc_ext_defs.hpp @ONLY)
+    include_directories(build/include)
+
     include(cmake/linux.cmake)
 
     # BUILD_NAME is set in cmake/linux.cmake
     add_executable(${BUILD_NAME} "")
     target_compile_features(${BUILD_NAME} PUBLIC cxx_std_20)
+
+    add_subdirectory(tests)
 
     # add external deps from git repos
     include(cmake/external.cmake)
@@ -21,11 +28,14 @@ if(CMAKE_PROJECT_NAME STREQUAL SSD1306_TEST_SUITE)
     # add catch2 test lib and unit test
     find_package(Catch2 3 REQUIRED)
     target_link_libraries(${BUILD_NAME} PRIVATE Catch2::Catch2WithMain)
-    add_subdirectory(tests)
+    
 
 endif()
 
 # if this is submodule in another project then just build as standalone
 add_subdirectory(src)
 
-
+# just for this local repo build
+if(CMAKE_PROJECT_NAME STREQUAL SSD1306_TEST_SUITE)
+    add_custom_target(cpp_ssd1306_size ALL ${CMAKE_SIZE} ${BUILD_NAME} DEPENDS ${BUILD_NAME})
+endif()

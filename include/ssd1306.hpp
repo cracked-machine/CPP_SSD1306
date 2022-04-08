@@ -49,7 +49,7 @@ public:
 	SPIDMA spi_dma_setting {SPIDMA::disabled};
 
 	
-	Driver(const DriverSerialInterface<DEVICE_ISR_ENUM> &display_spi_interface, SPIDMA dma_option) 
+	USED_API Driver(const DriverSerialInterface<DEVICE_ISR_ENUM> &display_spi_interface, SPIDMA dma_option) 
 	: spi_dma_setting (dma_option), m_serial_interface(display_spi_interface)
 	{
 		if (spi_dma_setting == SPIDMA::enabled)
@@ -60,7 +60,7 @@ public:
 	}
 
 	// @brief write setup commands to the IC
-	bool power_on_sequence()
+	USED_API bool power_on_sequence()
 	{
 		stm32::spi::enable_spi(m_serial_interface.get_spi_handle());
 
@@ -183,17 +183,17 @@ public:
 	// @return ErrorStatus 
 #ifdef USE_STD_STRING	
 	template<std::size_t FONT_SIZE> 
-	ErrorStatus write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
+	USED_API ErrorStatus write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
 #else
 
 	template<std::size_t FONT_SIZE, std::size_t MSG_SIZE>
-	ErrorStatus write(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
+	USED_API ErrorStatus write(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
 #endif // #ifdef USE_STD_STRING
 
 
 	// @brief callback function for InterruptManagerStm32g0 
 	// see stm32_interrupt_managers/inc/stm32g0_interrupt_manager_functional.hpp
-	void dma_isr()
+	USED_API void dma_isr()
 	{	// prevent ISR lockup
 		#if not defined(X86_UNIT_TESTING_ONLY)	
 			// cppcheck-suppress cstyleCast - CMSIS limitation
@@ -366,13 +366,13 @@ private:
 		Driver *m_parent_driver_ptr;
 		// @brief initialise and register this handler instance with InterruptManagerStm32g0
 		// @param parent_driver_ptr the instance to register
-		void register_driver(Driver *parent_driver_ptr)
+		USED_API void register_driver(Driver *parent_driver_ptr)
 		{
 			m_parent_driver_ptr = parent_driver_ptr;
 			stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM>::register_handler(m_parent_driver_ptr->m_serial_interface.get_dma_isr_type(), this);
 		}
         // @brief Definition of InterruptManagerStm32Base::ISR. This is called by stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM> specialization 
-		virtual void ISR()
+		USED_API virtual void ISR()
 		{
 			m_parent_driver_ptr->dma_isr();
 		}
@@ -382,7 +382,7 @@ private:
 
 
 	// @brief Reset the Driver IC and SW buffer.
-	void reset()
+	USED_API void reset()
 	{
 	#if not defined(X86_UNIT_TESTING_ONLY)
 		// Signal the driver IC to reset the OLED display
@@ -397,7 +397,7 @@ private:
 
 
 	// @brief Write the sw buffer to the IC GDDRAM (Page Addressing Mode only)
-	ErrorStatus update_screen()
+	USED_API ErrorStatus update_screen()
 	{
 		// DMA doesn't require explicitly send of commands or data
 		if (spi_dma_setting == SPIDMA::disabled)
@@ -431,7 +431,7 @@ private:
 	// @brief Send one command over SPI 
 	// @param cmd_byte The byte to send
 	// @return true if success, false if error
-	bool send_command(uint8_t cmd_byte [[maybe_unused]])
+	USED_API bool send_command(uint8_t cmd_byte [[maybe_unused]])
 	{
 		#if not defined(X86_UNIT_TESTING_ONLY)
 			// set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
@@ -446,7 +446,7 @@ private:
 	// @brief send one page of the display buffer over SPI
 	// @param page_pos_gddram The index position of the page within the buffer
 	// @return true if success, false if error
-	bool send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
+	USED_API bool send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
 	{
 	
 		// transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
@@ -470,7 +470,9 @@ private:
 			stm32::spi::send_byte(m_serial_interface.get_spi_handle(), m_buffer[idx]);
 			
 			// set data mode/high signal after we put data into TXFIFO to avoid premature latching
+			#ifndef X86_UNIT_TESTING_ONLY
 			LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());         
+			#endif
 		}
 		return true;
 	} 
@@ -506,15 +508,14 @@ ErrorStatus Driver<DEVICE_ISR_ENUM>::write(std::string &msg, Font<FONT_SIZE> &fo
 #else 
 template<typename DEVICE_ISR_ENUM>
 template<std::size_t FONT_SIZE, std::size_t MSG_SIZE> 
-ErrorStatus Driver<DEVICE_ISR_ENUM>::write(
-	noarch::containers::StaticString<MSG_SIZE> &msg, 
-	Font<FONT_SIZE> &font, 
-	uint8_t x, 
-	uint8_t y, 
-	Colour bg [[maybe_unused]], 
-	Colour fg, 
-	bool padding, 
-	bool update)
+ErrorStatus Driver<DEVICE_ISR_ENUM>::write(	noarch::containers::StaticString<MSG_SIZE> &msg, 
+											Font<FONT_SIZE> &font, 
+											uint8_t x, 
+											uint8_t y, 
+											Colour bg [[maybe_unused]], 
+											Colour fg, 
+											bool padding, 
+											bool update)
 {
     // invalid cursor position requested
 	if (!set_cursor(x, y))

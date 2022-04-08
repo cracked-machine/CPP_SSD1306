@@ -60,12 +60,12 @@ public:
 	m_dma_isr_type(dma_isr_type)
 	{
 	}
-	SPI_TypeDef * get_spi_handle() { return m_display_spi; }
-	GPIO_TypeDef* get_dc_port() { return m_dc_port; }
-	uint16_t get_dc_pin() { return m_dc_pin; }
-	GPIO_TypeDef* get_reset_port() { return m_reset_port; }
-	uint16_t get_reset_pin() { return m_reset_pin; }
-	DEVICE_ISR_ENUM get_dma_isr_type() { return m_dma_isr_type; }
+	USED_API SPI_TypeDef * get_spi_handle() { return m_display_spi; }
+	USED_API GPIO_TypeDef* get_dc_port() { return m_dc_port; }
+	USED_API uint16_t get_dc_pin() { return m_dc_pin; }
+	USED_API GPIO_TypeDef* get_reset_port() { return m_reset_port; }
+	USED_API uint16_t get_reset_pin() { return m_reset_pin; }
+	USED_API DEVICE_ISR_ENUM get_dma_isr_type() { return m_dma_isr_type; }
 private:
 	// @brief The SPI peripheral
 	SPI_TypeDef *m_display_spi;

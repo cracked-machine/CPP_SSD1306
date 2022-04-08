@@ -25,6 +25,7 @@
 
 #include <cstdint>
 #include <array>
+#include <gnuc_ext_defs.hpp>
 
 namespace ssd1306
 {
@@ -43,7 +44,7 @@ public:
 	// @brief function to get a font pixel (16bit half-word).
 	// @param idx The position in the font data array to retrieve data
 	// @return uint16_t The halfword of data we retrieve
-	bool get_pixel(size_t idx, uint32_t &bit_line) 
+	USED_API bool get_pixel(size_t idx, uint32_t &bit_line) 
 	{ 
 		if (idx > data.size())
 		{
@@ -58,15 +59,15 @@ public:
 
 	// @brief get the width member variable 
 	// @return uint8_t the width value
-	uint8_t width() { return m_width; }
+	USED_API uint8_t width() { return m_width; }
 
 	// @brief get tte height member variable 
 	// @return uint8_t the height value
-	uint8_t height() { return m_height; }
+	USED_API uint8_t height() { return m_height; }
 
 	// @brief helper function to get the size of the private font data array.
 	// @return size_t the array size
-	size_t size() { return data.size(); }
+	USED_API size_t size() { return data.size(); }
 
 	std::array<char, char_map_size> character_map {
 		' ', '!', '"', '#', '$', '%', '&', '\'','(', ')',

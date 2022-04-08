@@ -102,11 +102,11 @@ public:
 
 	// @brief Get the display width. Can be used to create a std::array
 	// @return constexpr uint16_t 
-	static constexpr uint16_t get_display_width() { return m_page_width; }
+	USED_API static constexpr uint16_t get_display_width() { return m_page_width; }
 
 	// @brief Get the display height. Can be used to create a std::array
 	// @return constexpr uint16_t 
-	static constexpr uint16_t get_display_height() { return m_height; }
+	USED_API static constexpr uint16_t get_display_height() { return m_height; }
 
 	// @brief Write single colour to entire sw buffer
 	// @param colour 
@@ -138,7 +138,7 @@ protected:
 	ErrorStatus write_string(std::string &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);
 #else
 	template<std::size_t FONT_SIZE, std::size_t MSG_SIZE>
-	ErrorStatus write_string(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);	
+	USED_API ErrorStatus write_string(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);	
 #endif // #ifdef USE_STD_STRING
 
 	// @brief 
@@ -149,7 +149,7 @@ protected:
 	// @param padding 
 	// @return ErrorStatus 
 	template<std::size_t FONT_SIZE> 
-	ErrorStatus write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
+	USED_API ErrorStatus write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
 
 };
 

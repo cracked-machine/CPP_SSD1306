@@ -11,7 +11,11 @@ if(CMAKE_PROJECT_NAME STREQUAL SSD1306_TEST_SUITE)
     configure_file(cmake/gnuc_ext_defs.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/gnuc_ext_defs.hpp @ONLY)
     include_directories(build/include)
 
+    # include the mock library with all unit test build source files
     add_definitions(-include ${CMAKE_BINARY_DIR}/embedded_utils/tests/mocks/mock.hpp) 
+
+    # x86 build config
+    include(cmake/linux.cmake)
     
     include(cmake/linux.cmake)
 

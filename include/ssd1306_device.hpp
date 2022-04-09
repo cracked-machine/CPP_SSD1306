@@ -28,10 +28,11 @@
 
 #include <ssd1306_common.hpp>
 
-
 // disable dynamic allocation/copying
 #include <restricted_base.hpp>
 
+// defines "USED_API __attribute__((__used__))"
+#include <gnuc_ext_defs.hpp>
 
 
 namespace ssd1306 

@@ -30,6 +30,9 @@
 #include <timer_manager.hpp>
 #include <cstring>
 
+// defines "USED_API __attribute__((__used__))"
+#include <gnuc_ext_defs.hpp>
+
 namespace ssd1306
 {
 

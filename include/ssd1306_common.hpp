@@ -209,10 +209,13 @@ ErrorStatus CommonFunctions::write_char(char ch, Font<FONT_SIZE> &font, Colour c
     }
 
     // Use the font to write
-    uint32_t font_data_word;
+    uint32_t font_data_word{0};
     for(size_t font_height_idx = 0; font_height_idx < font.height(); font_height_idx++) 
 	{
-        if (!font.get_pixel( (ch - 32) * font.height() + font_height_idx, font_data_word )) { return ErrorStatus::PIXEL_OOB; }
+        if (!font.get_pixel( (ch - 32) * 7 + font_height_idx, font_data_word )) 
+		{ 
+			return ErrorStatus::PIXEL_OOB; 
+		}
 
 		#ifdef ENABLE_SSD1306_TEST_STDOUT
 				// separator for the font

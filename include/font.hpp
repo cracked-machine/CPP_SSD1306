@@ -44,7 +44,7 @@ public:
 	// @brief function to get a font pixel (16bit half-word).
 	// @param idx The position in the font data array to retrieve data
 	// @return uint16_t The halfword of data we retrieve
-	USED_API bool get_pixel(size_t idx, uint32_t &bit_line) 
+	USED_API bool get_pixel(size_t idx, uint32_t &bit_line)
 	{ 
 		if (idx > data.size())
 		{
@@ -52,9 +52,12 @@ public:
 		}
 		else
 		{
-			bit_line = static_cast<uint32_t>(data.at(idx)); 
+			// don't use std::array.at(), this will force exception handling to bloat the linked .elf
+			bit_line = static_cast<uint32_t>(data[idx]); 
+
 			return true;
 		}
+		return true;
 	}
 
 	// @brief get the width member variable 
@@ -95,12 +98,18 @@ private:
 
 };
 
+constexpr uint8_t font5x5_height {5};
+constexpr uint8_t font5x7_height {7};
+constexpr uint8_t font7x10_height {10};
+constexpr uint8_t font11x18_height {18};
+constexpr uint8_t font16x26_height {26};
+
 // the template class object sizes only contribute to your program size if they are used; otherwise they are not linked
-using Font5x5 	= 	Font<5 * char_map_size>;		// 15408 bytes
-using Font5x7 	= 	Font<7 * char_map_size>;		// 15788 bytes
-using Font7x10 	= 	Font<10 * char_map_size>;		// 16364 bytes
-using Font11x18 = 	Font<18 * char_map_size>;		// 17936 bytes
-using Font16x26 = 	Font<26 * char_map_size>;		// 19456 bytes
+using Font5x5 	= 	Font<font5x5_height * char_map_size>;		// 15408 bytes
+using Font5x7 	= 	Font<font5x7_height * char_map_size>;		// 15788 bytes
+using Font7x10 	= 	Font<font7x10_height * char_map_size>;		// 16364 bytes
+using Font11x18 = 	Font<font11x18_height * char_map_size>;		// 17936 bytes
+using Font16x26 = 	Font<font16x26_height * char_map_size>;		// 19456 bytes
 
 } // namespace ssd1306
 

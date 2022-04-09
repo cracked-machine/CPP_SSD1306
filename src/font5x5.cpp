@@ -25,7 +25,7 @@
 namespace ssd1306
 {
 
-#ifdef USE_FONT_5X5
+
 
 // Font5x5 is declared in font.hpp
 
@@ -42,7 +42,7 @@ namespace ssd1306
 template<> uint8_t const Font5x5::m_width{5};
 
 // @brief 5 rows of two bytes (half-words)   
-template<> uint8_t const Font5x5::m_height{5};
+template<> uint8_t const Font5x5::m_height{font5x5_height};
 
 // @brief The font data, top to bottom.
 template<> std::array<uint16_t, Font5x5::m_height * char_map_size> Font5x5::data {
@@ -144,6 +144,5 @@ template<> std::array<uint16_t, Font5x5::m_height * char_map_size> Font5x5::data
     0x0000, 0x5000, 0x2800, 0x0000, 0x7000,  // ~
 };
 
-#endif // USE_FONT_5X5
 
 } // namespace ssd1306

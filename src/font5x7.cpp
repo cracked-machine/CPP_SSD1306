@@ -44,7 +44,7 @@ namespace ssd1306
 template<> uint8_t const Font5x7::m_width{5};
 
 // @brief 7 rows of two bytes (half-words)  
-template<> uint8_t const Font5x7::m_height{7};
+template<> uint8_t const Font5x7::m_height{font5x7_height};
 
 // @brief The font data, top to bottom.
 template<> std::array<uint16_t, Font5x7::m_height * char_map_size> Font5x7::data {

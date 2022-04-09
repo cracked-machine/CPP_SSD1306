@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.13392857142857142" function-rate="0.10810810810810811" branch-rate="0.00980392156862745" lines-covered="15" lines-valid="112" functions-covered="4" functions-valid="37" branches-covered="1" branches-valid="102" complexity="0.0" timestamp="1649438382" version="gcovr 5.1">
+<coverage line-rate="0.13392857142857142" function-rate="0.0975609756097561" branch-rate="0.00980392156862745" lines-covered="15" lines-valid="112" functions-covered="4" functions-valid="41" branches-covered="1" branches-valid="102" complexity="0.0" timestamp="1649509023" version="gcovr 5.1">
   <sources>
     <source>/home/chris/Projects/Embedded/BassStation/BassStationSequencerSW/extern/cpp_ssd1306</source>
   </sources>
@@ -17,11 +17,11 @@
               </conditions>
             </line>
             <line number="51" hits="0" branch="false"/>
-            <line number="55" hits="0" branch="false"/>
             <line number="56" hits="0" branch="false"/>
-            <line number="62" hits="0" branch="false"/>
-            <line number="66" hits="0" branch="false"/>
-            <line number="70" hits="0" branch="false"/>
+            <line number="58" hits="0" branch="false"/>
+            <line number="65" hits="0" branch="false"/>
+            <line number="69" hits="0" branch="false"/>
+            <line number="73" hits="0" branch="false"/>
           </lines>
         </class>
         <class name="ssd1306_common_hpp" filename="include/ssd1306_common.hpp" line-rate="0.0" branch-rate="0.0" complexity="0.0">

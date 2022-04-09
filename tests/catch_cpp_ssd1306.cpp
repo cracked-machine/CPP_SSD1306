@@ -24,7 +24,7 @@
 #include <ssd1306.hpp>
 #include <ssd1306_tester.hpp>
 #include <iostream>
-#include <mock_cmsis.hpp>
+#include <mock.hpp>
 
 TEST_CASE("Test Fonts", "[ssd1306_fonts]")
 {

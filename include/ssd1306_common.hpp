@@ -32,18 +32,13 @@
 #include <isr_manager_stm32g0.hpp>
 #include <static_string.hpp>
 
-#if defined(X86_UNIT_TESTING_ONLY)
-    // This file should contain CMSIS bit definitions
-    #include <mock_cmsis.hpp>
-	#include <iostream>
-#else
+#ifndef X86_UNIT_TESTING_ONLY
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wvolatile"
 		#include <stm32g0xx_ll_dma.h>
 		#include <stm32g0xx_ll_gpio.h>
 	#pragma GCC diagnostic pop
     #include <bitset_utils.hpp>
-       
 #endif
 
 #include <spi_utils.hpp> 

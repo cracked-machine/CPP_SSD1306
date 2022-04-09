@@ -11,10 +11,12 @@ if(CMAKE_PROJECT_NAME STREQUAL SSD1306_TEST_SUITE)
     configure_file(cmake/gnuc_ext_defs.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/gnuc_ext_defs.hpp @ONLY)
     include_directories(build/include)
 
+    add_definitions(-include ${CMAKE_BINARY_DIR}/embedded_utils/tests/mocks/mock.hpp) 
+    
     include(cmake/linux.cmake)
 
     # BUILD_NAME is set in cmake/linux.cmake
-    add_executable(${BUILD_NAME} "")
+    add_executable(${BUILD_NAME} "" ${CMAKE_BINARY_DIR}/embedded_utils/tests/mocks/mock.hpp)
     target_compile_features(${BUILD_NAME} PUBLIC cxx_std_20)
 
     add_subdirectory(tests)

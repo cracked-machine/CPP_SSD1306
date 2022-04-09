@@ -16,8 +16,6 @@ if(CMAKE_PROJECT_NAME STREQUAL SSD1306_TEST_SUITE)
 
     # x86 build config
     include(cmake/linux.cmake)
-    
-    include(cmake/linux.cmake)
 
     # BUILD_NAME is set in cmake/linux.cmake
     add_executable(${BUILD_NAME} "" ${CMAKE_BINARY_DIR}/embedded_utils/tests/mocks/mock.hpp)
@@ -27,6 +25,10 @@ if(CMAKE_PROJECT_NAME STREQUAL SSD1306_TEST_SUITE)
 
     # add external deps from git repos
     include(cmake/external.cmake)
+    # we only need to include this for unit testing
+    target_include_directories(${BUILD_NAME} PRIVATE 
+        ${CMAKE_BINARY_DIR}/embedded_utils/tests/mocks
+    )    
 
     # enable static analysis
     include(cmake/cppcheck.cmake)

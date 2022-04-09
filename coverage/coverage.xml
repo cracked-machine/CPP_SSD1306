@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.13392857142857142" function-rate="0.0975609756097561" branch-rate="0.00980392156862745" lines-covered="15" lines-valid="112" functions-covered="4" functions-valid="41" branches-covered="1" branches-valid="102" complexity="0.0" timestamp="1649531787" version="gcovr 5.1">
+<coverage line-rate="0.13392857142857142" function-rate="0.0975609756097561" branch-rate="0.00980392156862745" lines-covered="15" lines-valid="112" functions-covered="4" functions-valid="41" branches-covered="1" branches-valid="102" complexity="0.0" timestamp="1649535967" version="gcovr 5.1">
   <sources>
     <source>/home/chris/Projects/Embedded/BassStation/BassStationSequencerSW/extern/cpp_ssd1306</source>
   </sources>

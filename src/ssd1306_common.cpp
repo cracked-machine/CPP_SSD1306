@@ -66,7 +66,4 @@ bool CommonFunctions::set_cursor(uint8_t x, uint8_t y)
     return true;
 }
 
-
-
-
 } // namespace ssd1306

@@ -23,6 +23,7 @@
 #include <catch2/catch_all.hpp>
 #include <ssd1306.hpp>
 #include <ssd1306_tester.hpp>
+#include <font.hpp>
 #include <iostream>
 #include <mock.hpp>
 
@@ -196,4 +197,27 @@ TEST_CASE("Test Fonts", "[ssd1306_fonts]")
     
 
 // }
+
+// enforce code coverage with explicit instances of func templates so that linker does not drop references
+template bool ssd1306::Font5x5::get_pixel(size_t idx, uint32_t &bit_line);
+template uint8_t ssd1306::Font5x5::width();
+template uint8_t ssd1306::Font5x5::height();
+template size_t ssd1306::Font5x5::size();
+enum class DummyInterruptType { usart5, capacity };
+template ssd1306::Driver<DummyInterruptType>::Driver(const DriverSerialInterface<DummyInterruptType> &display_spi_interface, SPIDMA dma_option);
+template bool ssd1306::Driver<DummyInterruptType>::power_on_sequence();
+template void ssd1306::Driver<DummyInterruptType>::dma_isr();
+template void ssd1306::Driver<DummyInterruptType>::reset();
+template ssd1306::ErrorStatus ssd1306::Driver<DummyInterruptType>::update_screen();
+template bool ssd1306::Driver<DummyInterruptType>::send_command(uint8_t page_pos_gddram);
+template bool ssd1306::Driver<DummyInterruptType>::send_page_data(uint16_t page_pos_gddram);
+template ssd1306::ErrorStatus ssd1306::Driver<DummyInterruptType>::write(noarch::containers::StaticString<1> &msg, ssd1306::Font5x5 &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
+template ssd1306::DriverSerialInterface<DummyInterruptType>::DriverSerialInterface(SPI_TypeDef *display_spi, std::pair<GPIO_TypeDef*, uint16_t> dc_gpio, std::pair<GPIO_TypeDef*, uint16_t> reset_gpio, DummyInterruptType dma_isr_type);
+template SPI_TypeDef* ssd1306::DriverSerialInterface<DummyInterruptType>::get_spi_handle();
+template GPIO_TypeDef* ssd1306::DriverSerialInterface<DummyInterruptType>::get_dc_port();
+template uint16_t ssd1306::DriverSerialInterface<DummyInterruptType>::get_dc_pin();
+template GPIO_TypeDef* ssd1306::DriverSerialInterface<DummyInterruptType>::get_reset_port();
+template uint16_t ssd1306::DriverSerialInterface<DummyInterruptType>::get_reset_pin();
+template DummyInterruptType ssd1306::DriverSerialInterface<DummyInterruptType>::get_dma_isr_type();
+
 

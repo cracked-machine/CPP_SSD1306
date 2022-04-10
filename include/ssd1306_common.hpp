@@ -94,14 +94,6 @@ public:
 	// @brief byte buffer for ssd1306. Access to derived classes like ssd1306_tester is permitted.
     std::array<uint8_t, (m_page_width*m_height)/8> m_buffer;    
 
-	// @brief Get the display width. Can be used to create a std::array
-	// @return constexpr uint16_t 
-	static constexpr uint16_t get_display_width() { return m_page_width; }
-
-	// @brief Get the display height. Can be used to create a std::array
-	// @return constexpr uint16_t 
-	static constexpr uint16_t get_display_height() { return m_height; }
-
 	// @brief Write single colour to entire sw buffer
 	// @param colour 
 	void fill(Colour colour);    

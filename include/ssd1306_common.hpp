@@ -42,10 +42,6 @@
 #endif
 
 #include <spi_utils.hpp> 
-
-// defines "USED_API __attribute__((__used__))"
-#include <gnuc_ext_defs.hpp>
-
 namespace ssd1306
 {
 
@@ -100,11 +96,11 @@ public:
 
 	// @brief Get the display width. Can be used to create a std::array
 	// @return constexpr uint16_t 
-	USED_API static constexpr uint16_t get_display_width() { return m_page_width; }
+	static constexpr uint16_t get_display_width() { return m_page_width; }
 
 	// @brief Get the display height. Can be used to create a std::array
 	// @return constexpr uint16_t 
-	USED_API static constexpr uint16_t get_display_height() { return m_height; }
+	static constexpr uint16_t get_display_height() { return m_height; }
 
 	// @brief Write single colour to entire sw buffer
 	// @param colour 
@@ -136,7 +132,7 @@ protected:
 	ErrorStatus write_string(std::string &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);
 #else
 	template<std::size_t FONT_SIZE, std::size_t MSG_SIZE>
-	USED_API ErrorStatus write_string(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);	
+	ErrorStatus write_string(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, Colour colour, bool padding);	
 #endif // #ifdef USE_STD_STRING
 
 	// @brief 
@@ -147,7 +143,7 @@ protected:
 	// @param padding 
 	// @return ErrorStatus 
 	template<std::size_t FONT_SIZE> 
-	USED_API ErrorStatus write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
+	ErrorStatus write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
 
 };
 

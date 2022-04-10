@@ -29,10 +29,6 @@
 #include <ssd1306_device.hpp>
 #include <timer_manager.hpp>
 #include <cstring>
-
-// defines "USED_API __attribute__((__used__))"
-#include <gnuc_ext_defs.hpp>
-
 namespace ssd1306
 {
 
@@ -52,7 +48,7 @@ public:
 	SPIDMA spi_dma_setting {SPIDMA::disabled};
 
 	
-	USED_API Driver(const DriverSerialInterface<DEVICE_ISR_ENUM> &display_spi_interface, SPIDMA dma_option) 
+	Driver(const DriverSerialInterface<DEVICE_ISR_ENUM> &display_spi_interface, SPIDMA dma_option) 
 	: spi_dma_setting (dma_option), m_serial_interface(display_spi_interface)
 	{
 		if (spi_dma_setting == SPIDMA::enabled)
@@ -63,7 +59,7 @@ public:
 	}
 
 	// @brief write setup commands to the IC
-	USED_API bool power_on_sequence()
+	bool power_on_sequence()
 	{
 		stm32::spi::enable_spi(m_serial_interface.get_spi_handle());
 
@@ -186,17 +182,17 @@ public:
 	// @return ErrorStatus 
 #ifdef USE_STD_STRING	
 	template<std::size_t FONT_SIZE> 
-	USED_API ErrorStatus write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
+	ErrorStatus write(std::string &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
 #else
 
 	template<std::size_t FONT_SIZE, std::size_t MSG_SIZE>
-	USED_API ErrorStatus write(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
+	ErrorStatus write(noarch::containers::StaticString<MSG_SIZE> &msg, Font<FONT_SIZE> &font, uint8_t x, uint8_t y, Colour bg, Colour fg, bool padding, bool update);
 #endif // #ifdef USE_STD_STRING
 
 
 	// @brief callback function for InterruptManagerStm32g0 
 	// see stm32_interrupt_managers/inc/stm32g0_interrupt_manager_functional.hpp
-	USED_API void dma_isr()
+	void dma_isr()
 	{	// prevent ISR lockup
 		#if not defined(X86_UNIT_TESTING_ONLY)	
 			// cppcheck-suppress cstyleCast - CMSIS limitation
@@ -369,13 +365,13 @@ private:
 		Driver *m_parent_driver_ptr;
 		// @brief initialise and register this handler instance with InterruptManagerStm32g0
 		// @param parent_driver_ptr the instance to register
-		USED_API void register_driver(Driver *parent_driver_ptr)
+		void register_driver(Driver *parent_driver_ptr)
 		{
 			m_parent_driver_ptr = parent_driver_ptr;
 			stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM>::register_handler(m_parent_driver_ptr->m_serial_interface.get_dma_isr_type(), this);
 		}
         // @brief Definition of InterruptManagerStm32Base::ISR. This is called by stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM> specialization 
-		USED_API virtual void ISR()
+		virtual void ISR()
 		{
 			m_parent_driver_ptr->dma_isr();
 		}
@@ -385,7 +381,7 @@ private:
 
 
 	// @brief Reset the Driver IC and SW buffer.
-	USED_API void reset()
+	void reset()
 	{
 	#if not defined(X86_UNIT_TESTING_ONLY)
 		// Signal the driver IC to reset the OLED display
@@ -400,7 +396,7 @@ private:
 
 
 	// @brief Write the sw buffer to the IC GDDRAM (Page Addressing Mode only)
-	USED_API ErrorStatus update_screen()
+	ErrorStatus update_screen()
 	{
 		// DMA doesn't require explicitly send of commands or data
 		if (spi_dma_setting == SPIDMA::disabled)
@@ -434,7 +430,7 @@ private:
 	// @brief Send one command over SPI 
 	// @param cmd_byte The byte to send
 	// @return true if success, false if error
-	USED_API bool send_command(uint8_t cmd_byte [[maybe_unused]])
+	bool send_command(uint8_t cmd_byte [[maybe_unused]])
 	{
 		#if not defined(X86_UNIT_TESTING_ONLY)
 			// set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
@@ -449,7 +445,7 @@ private:
 	// @brief send one page of the display buffer over SPI
 	// @param page_pos_gddram The index position of the page within the buffer
 	// @return true if success, false if error
-	USED_API bool send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
+	bool send_page_data(uint16_t page_pos_gddram [[maybe_unused]])
 	{
 	
 		// transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)

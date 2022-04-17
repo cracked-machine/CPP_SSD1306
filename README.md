@@ -15,3 +15,7 @@ Add this repo ([cpp_ssd1306](https://github.com/cracked-machine/cpp_ssd1306.git)
 ```
 add_subdirectory(cpp_ssd1306)
 ```
+
+#### External Dependencies
+
+[Embedded Utils](https://github.com/cracked-machine/embedded_utils)

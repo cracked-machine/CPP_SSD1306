@@ -51,11 +51,6 @@ public:
       : spi_dma_setting(dma_option),
         m_serial_interface(display_spi_interface)
   {
-    if (spi_dma_setting == SPIDMA::enabled)
-    {
-      // register the interrupt with InterruptManagerStm32g0
-      m_dma_int_handler.register_driver(this);
-    }
   }
 
   // @brief write setup commands to the IC
@@ -453,19 +448,19 @@ private:
   struct DmaIntHandler : public stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM>
   {
     // @brief the parent driver class
-    Driver *m_parent_driver_ptr;
+    Driver &m_parent_driver_ptr;
     // @brief initialise and register this handler instance with InterruptManagerStm32g0
     // @param parent_driver_ptr the instance to register
-    void register_driver(Driver *parent_driver_ptr)
+    DmaIntHandler(Driver *parent_driver_ptr)
+        : m_parent_driver_ptr(*parent_driver_ptr)
     {
-      m_parent_driver_ptr = parent_driver_ptr;
-      stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM>::register_handler(m_parent_driver_ptr->m_serial_interface.get_dma_isr_type(), this);
+      stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM>::register_handler(m_parent_driver_ptr.m_serial_interface.get_dma_isr_type(), this);
     }
     // @brief Definition of InterruptManagerStm32Base::ISR. This is called by stm32::isr::InterruptManagerStm32Base<DEVICE_ISR_ENUM> specialization
-    virtual void ISR() { m_parent_driver_ptr->dma_isr(); }
+    virtual void ISR() { m_parent_driver_ptr.dma_isr(); }
   };
   // @brief handler object
-  DmaIntHandler m_dma_int_handler;
+  DmaIntHandler m_dma_int_handler{this};
 
   // @brief Reset the Driver IC and SW buffer.
   void reset()

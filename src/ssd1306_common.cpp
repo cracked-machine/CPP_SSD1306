@@ -27,43 +27,43 @@ namespace ssd1306
 
 void CommonFunctions::fill(Colour colour)
 {
-    for(auto &pixel : m_buffer)
-    {
-        pixel = (colour == Colour::Black) ? 0x00 : 0xFF;
-    }
+  for (auto &pixel : m_buffer)
+  {
+    pixel = (colour == Colour::Black) ? 0x00 : 0xFF;
+  }
 }
 
 void CommonFunctions::draw_pixel(uint8_t x, uint8_t y, Colour colour)
 {
-    // Draw in the right color
-    if(colour == Colour::White) 
-    {
-        m_buffer[x + (y / 8) * m_page_width] |= 1 << (y % 8);
-        #ifdef ENABLE_SSD1306_TEST_STDOUT
-                std::cout << "1";
-        #endif
-    } 
-    else 
-    {
-        m_buffer[x + (y / 8) * m_page_width] &= ~(1 << (y % 8));
-        #ifdef ENABLE_SSD1306_TEST_STDOUT
-                std::cout << "_";
-        #endif
-    }
-}	
+  // Draw in the right color
+  if (colour == Colour::White)
+  {
+    m_buffer[x + (y / 8) * m_page_width] |= 1 << (y % 8);
+#ifdef ENABLE_SSD1306_TEST_STDOUT
+    std::cout << "1";
+#endif
+  }
+  else
+  {
+    m_buffer[x + (y / 8) * m_page_width] &= ~(1 << (y % 8));
+#ifdef ENABLE_SSD1306_TEST_STDOUT
+    std::cout << "_";
+#endif
+  }
+}
 
 bool CommonFunctions::set_cursor(uint8_t x, uint8_t y)
-{ 
-    if(x >= m_page_width || y >= m_height) 
-    {
-        return false;
-    }
-    else
-    {
-        m_currentx = x;
-        m_currenty = y;
-    }
-    return true;
+{
+  if (x >= m_page_width || y >= m_height)
+  {
+    return false;
+  }
+  else
+  {
+    m_currentx = x;
+    m_currenty = y;
+  }
+  return true;
 }
 
 } // namespace ssd1306

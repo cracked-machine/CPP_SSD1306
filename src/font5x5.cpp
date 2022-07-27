@@ -25,8 +25,6 @@
 namespace ssd1306
 {
 
-
-
 // Font5x5 is declared in font.hpp
 
 // 5x5 - '1'
@@ -39,13 +37,15 @@ namespace ssd1306
 // - o o o - x x x x x x x x x x x	0x7000  ROW #4
 
 // @brief only 3 MSB of each halfword are used. 1 bit per col.
-template<> uint8_t const Font5x5::m_width{5};
+template <> uint8_t const Font5x5::m_width{5};
 
-// @brief 5 rows of two bytes (half-words)   
-template<> uint8_t const Font5x5::m_height{font5x5_height};
+// @brief 5 rows of two bytes (half-words)
+template <> uint8_t const Font5x5::m_height{font5x5_height};
 
 // @brief The font data, top to bottom.
-template<> std::array<uint16_t, Font5x5::m_height * char_map_size> Font5x5::data {
+template <>
+std::array<uint16_t, Font5x5::m_height * char_map_size> Font5x5::data{
+    // clang-format off
 //  ROW #0  ROW #1  ROW #2  ROW #3  ROW #4
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // sp
     0x2000, 0x2000, 0x0000, 0x2000, 0x0000,  // !
@@ -143,6 +143,6 @@ template<> std::array<uint16_t, Font5x5::m_height * char_map_size> Font5x5::data
     0x6000, 0x1000, 0x1800, 0x1000, 0x6000,  // }
     0x0000, 0x5000, 0x2800, 0x0000, 0x7000,  // ~
 };
-
+// clang-format on
 
 } // namespace ssd1306

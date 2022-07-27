@@ -42,13 +42,15 @@ namespace ssd1306
 // - - - - - - - x x x x x x x x x	0x0000  ROW #9
 
 // @brief only 7 MSB of each halfword are used. 1 bit per col.
-template<> uint8_t const Font7x10::m_width{7};
+template <> uint8_t const Font7x10::m_width{7};
 
-// @brief 10 rows of two bytes (half-words)    
-template<> uint8_t const Font7x10::m_height{font7x10_height};
+// @brief 10 rows of two bytes (half-words)
+template <> uint8_t const Font7x10::m_height{font7x10_height};
 
 // @brief The font data, top to bottom.
-template<> std::array<uint16_t, Font7x10::m_height * char_map_size> Font7x10::data {
+template <>
+std::array<uint16_t, Font7x10::m_height * char_map_size> Font7x10::data{
+    // clang-format off
 //  ROW #0  ROW #1  ROW #2  ROW #3  ROW #4  ROW #5  ROW #6  ROW #7  ROW #8  ROW #9
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // sp
     0x1000, 0x1000, 0x1000, 0x1000, 0x1000, 0x1000, 0x0000, 0x1000, 0x0000, 0x0000,  // !
@@ -146,5 +148,5 @@ template<> std::array<uint16_t, Font7x10::m_height * char_map_size> Font7x10::da
     0x3000, 0x1000, 0x1000, 0x1000, 0x0800, 0x0800, 0x1000, 0x1000, 0x1000, 0x3000,  // }
     0x0000, 0x0000, 0x0000, 0x7400, 0x4C00, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000,  // ~
 };
-
-}   // namespace ssd1306
+// clang-format on
+} // namespace ssd1306

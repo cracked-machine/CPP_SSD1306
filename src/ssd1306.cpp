@@ -27,57 +27,7 @@
 
 #include <cstring>
 
-
 namespace ssd1306
 {
-
-
-
-// #if defined(X86_UNIT_TESTING_ONLY) || defined(USE_RTT)
-// void Driver::dump_buffer(bool hex)
-// {
-//     uint16_t byte_count {0};
-//     for (auto& byte : m_buffer)
-//     {
-//         #if defined(USE_RTT)
-//             // separate the buffer into pages
-//             if ((byte_count) % m_page_width == 0)
-//             {
-//                 SEGGER_RTT_printf(0, "\n\n");   
-//                 SEGGER_RTT_printf(0, "Page #%u:\n", ((byte_count) / m_page_width));
-//             }      
-//             // seperate the page into lines of 32 bytes
-//             if ((byte_count) % 32 == 0)
-//             {
-//                 SEGGER_RTT_printf(0, "\n");   
-//             }                 
-//             if (hex)
-//             {
-//                 SEGGER_RTT_printf(0, "0x%02x ", +byte);
-//             }
-//             else 
-//             {
-//                 SEGGER_RTT_printf(0, "%u ", +byte);
-//             }
-//         #elif defined(X86_UNIT_TESTING_ONLY)
-//             if ((byte_count) % m_page_width == 0)
-//             {
-//                 std::cout << std::endl << std::endl;
-//             } 
-//             if (hex)
-//             {
-//                 std::cout << "0x" << std::hex << std::setfill ('0') <<  std::setw(2) << +byte << " ";
-//             }
-//             else
-//             {
-//                 std::cout << +byte << " ";
-//             }
-
-//         #endif   
-
-//         byte_count ++;
-//     }
-// }
-// #endif
 
 } // namespace ssd1306

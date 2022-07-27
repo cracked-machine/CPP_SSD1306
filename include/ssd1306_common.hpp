@@ -36,7 +36,7 @@
   #include <bitset_utils.hpp>
 #endif
 
-#include <spi_utils.hpp>
+#include <spi_utils_ref.hpp>
 namespace ssd1306
 {
 
@@ -115,7 +115,8 @@ protected:
   // @param colour
   // @param padding
   // @return ErrorStatus
-  template <std::size_t FONT_SIZE> ErrorStatus write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
+  template <std::size_t FONT_SIZE>
+  ErrorStatus write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding);
 };
 
 template <std::size_t FONT_SIZE, std::size_t MSG_SIZE>
@@ -133,7 +134,8 @@ ErrorStatus CommonFunctions::write_string(noarch::containers::StaticString<MSG_S
   return ErrorStatus::OK;
 }
 
-template <std::size_t FONT_SIZE> ErrorStatus CommonFunctions::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding)
+template <std::size_t FONT_SIZE>
+ErrorStatus CommonFunctions::write_char(char ch, Font<FONT_SIZE> &font, Colour colour, bool padding)
 {
 
   // Check remaining space on current line

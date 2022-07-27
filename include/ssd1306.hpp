@@ -29,11 +29,13 @@
 #include <cstring>
 #include <ssd1306_device.hpp>
 #include <timer_manager.hpp>
+
 namespace ssd1306
 {
 
 // @brief
-template <typename DEVICE_ISR_ENUM> class Driver : public RestrictedBase, public CommonFunctions
+template <typename DEVICE_ISR_ENUM>
+class Driver : public RestrictedBase, public CommonFunctions
 {
 public:
   enum class SPIDMA
@@ -59,7 +61,7 @@ public:
   // @brief write setup commands to the IC
   bool power_on_sequence()
   {
-    stm32::spi::enable_spi(m_serial_interface.get_spi_handle());
+    stm32::spi_ref::enable_spi(m_serial_interface.get_spi_handle());
 
     reset();
 
@@ -230,10 +232,10 @@ public:
     {
 #if not defined(X86_UNIT_TESTING_ONLY)
       // no more commands to send so set data mode/high signal
-      LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());
+      LL_GPIO_SetOutputPin(&m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());
 
       // setup the SPI DMA
-      stm32::spi::enable_spi(m_serial_interface.get_spi_handle(), false);
+      stm32::spi_ref::enable_spi(m_serial_interface.get_spi_handle(), false);
 
       // cppcheck-suppress cstyleCast - CMSIS limitation
       LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, (uint32_t)m_buffer.size());
@@ -246,8 +248,8 @@ public:
       // cppcheck-suppress cstyleCast - CMSIS limitation
       LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
 
-      m_serial_interface.get_spi_handle()->CR2 = m_serial_interface.get_spi_handle()->CR2 | SPI_CR2_TXDMAEN;
-      stm32::spi::enable_spi(m_serial_interface.get_spi_handle());
+      m_serial_interface.get_spi_handle().CR2 = m_serial_interface.get_spi_handle().CR2 | SPI_CR2_TXDMAEN;
+      stm32::spi_ref::enable_spi(m_serial_interface.get_spi_handle());
 #endif
     }
 
@@ -470,9 +472,9 @@ private:
   {
 #if not defined(X86_UNIT_TESTING_ONLY)
     // Signal the driver IC to reset the OLED display
-    LL_GPIO_ResetOutputPin(m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
+    LL_GPIO_ResetOutputPin(&m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
     stm32::delay_millisecond(10);
-    LL_GPIO_SetOutputPin(m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
+    LL_GPIO_SetOutputPin(&m_serial_interface.get_reset_port(), m_serial_interface.get_reset_pin());
     stm32::delay_millisecond(10);
 #endif
     // reset the sw buffer
@@ -528,10 +530,10 @@ private:
   {
 #if not defined(X86_UNIT_TESTING_ONLY)
     // set cmd mode/low signal after we put data into TXFIFO to avoid premature latching
-    LL_GPIO_ResetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());
+    LL_GPIO_ResetOutputPin(&m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());
 
     // send the command over SPI bus
-    stm32::spi::send_byte(m_serial_interface.get_spi_handle(), cmd_byte);
+    stm32::spi_ref::send_byte(m_serial_interface.get_spi_handle(), cmd_byte);
 #endif
     return true;
   }
@@ -545,24 +547,24 @@ private:
     // transmit bytes from this page (page_pos_gddram -> page_pos_gddram + m_page_width)
     for (uint16_t idx = page_pos_gddram; idx < page_pos_gddram + m_page_width; idx++)
     {
-      if (!stm32::spi::wait_for_txe_flag(m_serial_interface.get_spi_handle()))
+      if (!stm32::spi_ref::wait_for_txe_flag(m_serial_interface.get_spi_handle()))
       {
 #if defined(USE_RTT)
         SEGGER_RTT_printf(0, "\nsend_page_data(): Tx buffer is full.");
 #endif
       }
-      if (!stm32::spi::wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
+      if (!stm32::spi_ref::wait_for_bsy_flag(m_serial_interface.get_spi_handle()))
       {
 #if defined(USE_RTT)
         SEGGER_RTT_printf(0, "\nsend_page_data(): SPI bus is busy.");
 #endif
       }
       // send the page over SPI bus
-      stm32::spi::send_byte(m_serial_interface.get_spi_handle(), m_buffer[idx]);
+      stm32::spi_ref::send_byte(m_serial_interface.get_spi_handle(), m_buffer[idx]);
 
 // set data mode/high signal after we put data into TXFIFO to avoid premature latching
 #ifndef X86_UNIT_TESTING_ONLY
-      LL_GPIO_SetOutputPin(m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());
+      LL_GPIO_SetOutputPin(&m_serial_interface.get_dc_port(), m_serial_interface.get_dc_pin());
 #endif
     }
     return true;

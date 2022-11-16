@@ -25,11 +25,12 @@
 
 #include <cstdint>
 #include <array>
+#include <cstddef>
 
 namespace ssd1306
 {
 
-const size_t char_map_size {95};
+const std::size_t char_map_size {95};
 
 template<std::size_t FONT_SIZE>
 class Font
@@ -43,7 +44,7 @@ public:
 	// @brief function to get a font pixel (16bit half-word).
 	// @param idx The position in the font data array to retrieve data
 	// @return uint16_t The halfword of data we retrieve
-	bool get_pixel(size_t idx, uint32_t &bit_line)
+	bool get_pixel(std::size_t idx, uint32_t &bit_line)
 	{ 
 		if (idx > data.size())
 		{
@@ -69,7 +70,7 @@ public:
 
 	// @brief helper function to get the size of the private font data array.
 	// @return size_t the array size
-	size_t size() { return data.size(); }
+	std::size_t size() { return data.size(); }
 
 	std::array<char, char_map_size> character_map {
 		' ', '!', '"', '#', '$', '%', '&', '\'','(', ')',
